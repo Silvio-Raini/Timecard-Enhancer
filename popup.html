@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>TITLE</title>
+    <title>Timecard Enhancer</title>
     <meta charset="utf8">
   </head>
   <style type="text/css">
@@ -15,6 +15,8 @@
       align-items: center;
       padding: 3.5rem 1rem 2rem;
       row-gap: 1rem;
+      font-family: Verdana;
+      height: 25rem;
     }
     h1 {
       font-size: 1rem;
@@ -32,25 +34,27 @@
       margin: 0;
     }
     button {
-      background: var(--primary);
-      border: none;
-      color: var(--secondary);
+      background: var(--secondary);
+      border: 2px solid var(--primary);
+      color: var(--primary);
       cursor: pointer;
       font-size: 1rem;
       padding: 0.5rem 1rem;
       border-radius: 0.25rem;
       font-weight: 500;
+      transition: 0.4s;
     }
 
     .input {
       position: relative;
       width: 100%;
       height: 3rem;
+      border: 1px solid;
     }
 
     .input > label {
       position: absolute;
-      top: 0;
+      top: 0.25rem;
       left: 0.5rem;
       z-index: 1;
     }
@@ -64,6 +68,7 @@
       padding: 1rem 0.5rem 0;
       font-size: 1rem;
       outline: none;
+      border: none;
     }
     .list {
       display: flex;
@@ -73,57 +78,232 @@
       width: 100%;
     }
 
-    .list > .set {
+    .list > div {
       position: relative;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    .list > .set > span.title {
+    .list > div > span.title {
       font-size: 0.75rem;
       font-weight: 500;
       text-align: left;
     }
 
-    .list > .set > span.subtitle {
+    .list > div > span.subtitle {
       font-weight: 400;
       text-align: left;
     }
 
-    .list > .set > span {
+    .list > div > span {
       width: 4.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .list > .set > button {
+    .list > div > button {
       float: right;
       font-size: 0.8rem;
       padding: 0.25rem 0.5rem;
+      background: var(--primary);
+      color: var(--secondary);
+      border: 1px solid var(--secondary);
+      transition: 0.4s;
     }
 
-    .list > .set > span.syntax {
+    .list > div > span.syntax {
       width: 14rem;
     }
-  </style>
+
+    body > div {
+      width: 100%;
+      display: flex;
+      column-gap: 1rem;
+    }
+
+    .list > div > button:hover {
+      background: var(--secondary);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    button#save:hover {
+      background: var(--primary);
+      color: var(--secondary);
+      border: 2px solid var(--primary);
+    }
+
+    div#alert {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2rem;
+      background-color: var(--primary);
+      color: var(--secondary);
+      border-top: 2px solid #fff;
+      font-weight: 500;
+      font-size: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-bottom: 0.25rem;
+      transform: translateY(100%);
+    }
+
+    div#alert.animate {
+      animation: alert 2.75s;
+    }
+
+    @keyframes alert {
+      0% { transform: translateY(100%) }
+      50% { transform: translateY(0) }
+      65% { transform: translateY(0) }
+      100% { transform: translateY(100%) }
+    }
+
+    div#editor {
+      visibility: hidden;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70%;
+      height: auto;
+      aspect-ratio: 9/12;
+      background: #fff;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 20%);
+      border-radius: 0.5rem;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem;
+      row-gap: 1rem;
+      max-height: 60%;
+      box-sizing: border-box;
+    }
+
+    div.input > div {
+      /* position: absolute; */
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3rem;
+      padding: 2rem 0.5rem 0;
+      font-size: 1rem;
+      outline: none;
+      display: flex;
+      flex-wrap: wrap;
+      row-gap: 0.5rem;
+      column-gap: 0.5rem;
+      height: auto;
+      justify-content: space-around;
+    }
+
+    div.input > div > select, div.input > div > input {
+      height: 2rem;
+      width: 7rem;
+      outline: none;
+      border: 1px solid;
+    }
+
+    button[name="add"] {
+      border-width: 1px;
+      font-weight: 500;
+      background: var(--primary);
+      color: var(--secondary);
+      aspect-ratio: 1/1;
+      width: auto;
+      height: 2rem;
+      display: flex;
+      font-size: 1.5rem;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+    }
+
+    div.input > div > input[type="time"] {padding-right: 1.45rem;position: relative;font-size: 0.75rem;}
+
+    div.input > div > select:after, div.input > div > input[type="time"]:after {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      content: '↓';
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    div.list > div.step {
+      display: flex;
+      justify-content: center;
+    }  
+    div#editor button:hover {
+      background: var(--primary);
+      color: var(--secondary);
+    }
+    </style>
   <body>
     <h1>Timecard Enhancer</h1>
     <h3>Konfiguration</h3>
-    <div class="input">
-      <label for="usualPauseTime" title="Zeit in Stunden nach Arbeitsbeginn">Deine typische Pausenzeit:</label>
-      <input id="usualPauseTime" name="usualPauseTime" type="time" step="1">
+    <div>
+      <div class="input">
+        <label for="usualPauseStart" title="Absoluter (ab 08:00:00 aufwärts) oder Relativer Zeitwert">Pausenbeginn ab:</label>
+        <input id="usualPauseStart" name="usualPauseStart" type="time" step="1">
+      </div>
+
+      <div class="input">
+        <label for="usualPauseTime" title="Zeitspanne deiner Pause">Typische Pausenzeit:</label>
+        <input id="usualPauseTime" name="usualPauseTime" type="time" step="1">
+      </div>
     </div>
+    
     <div class="list">
-      <div class="set">
-        <span class="title">Gehen</span><span class="subtitle">frühestens</span><span class="syntax">{Anfang} + {08:00:00} + {00:30:00} - {GZ}</span><button name="edit" value="1">Bearbeiten</button>
-      </div>
-      <div class="set">
-        <span class="title">Gehen</span><span class="subtitle">normal</span><span class="syntax">{Anfang} + {08:00:00} + {00:30:00}</span><button name="edit" value="2">Bearbeiten</button>
-      </div>
-      <div class="set">
-        <span class="title">Pause</span><span class="subtitle"></span><span class="syntax">{Anfang} + {06:00:00}</span><button name="edit" value="3">Bearbeiten</button>
-      </div>
+      <div class="step"><button name="append">+ Modul erstellen</button></div>
     </div>
-    <button type="button" id="save">Speichern</button>
+
+    <button type="button" id="save" name="save">Speichern</button>
+
+    <div id="editor">
+      <div class="input">
+        <label for="editName" title="Bezeichnung des Moduls">Name</label>
+        <input id="editName" name="editName" type="text">
+      </div>
+
+      <div class="input">
+        <label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label>
+        <input id="editBeschreibung" name="editBeschreibung" type="text">
+      </div>
+
+      <div class="input" style="height: auto; padding-bottom: 1rem;">
+        <label title="Rechenweg des Moduls">Berechnung</label>
+        <div>
+          <select>
+            <option value="empty" disabled selected>Variable wählen</option>
+            <option value="A">Arbeitsbeginn</option>
+            <option value="P">Pausenzeit</option>
+            <option value="L">Feierabend</option>
+            <option value="G">Gleitzeit</option>
+            <option value="R">Verbleibend</option>
+            <option value="time">Zeit</option>
+          </select>
+          <button name="add">+</button>
+        </div>
+      </div>
+
+      <div class="input">
+        <label for="editPosition" title="Position des Moduls">Position</label>
+        <input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1">
+      </div>
+
+      <button name="editSave">Speichern</button>
+    </div>
+
+    <div id="alert">
+      <span></span>
+    </div>
+    <script src="jquery.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

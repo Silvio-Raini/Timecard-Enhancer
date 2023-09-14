@@ -5,7 +5,8 @@ function calcFeierabend() {
   var tableBody = document.querySelector('#balances-daily tbody');
 
   var config = {
-    'standard_pausenzeit': 30, // config panel typical pause times, default: 30 min.
+    'standard_pausenzeit': '00:30:00', // config panel typical pause times, default: 30 min.
+    'standard_pausenbeginn': '06:00:00', // config panel typical pause times, default: 30 min.
   };
 
   var modules = {
@@ -64,7 +65,12 @@ function calcFeierabend() {
       var pauseTimes = splitTime(pauseTime);
 
       if(pauseTimes['hours'] == 0 && pauseTimes['minutes'] == 0 && pauseTimes['seconds'] == 0) {
-        pauseTimes['minutes'] = config['standard_pausenzeit'];
+        var pausenDauer = splitTime(config['standard_pausenzeit']);
+
+        pauseTimes['hours'] = pausenDauer['hours'];
+        pauseTimes['minutes'] = pausenDauer['minutes'];
+        pauseTimes['seconds'] = pausenDauer['seconds'];
+        
         pauseTime = unsplitTime(pauseTimes);
       }
 
