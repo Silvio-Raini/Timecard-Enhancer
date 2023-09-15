@@ -9,53 +9,6 @@ function calcFeierabend() {
     'standard_pausenbeginn': '06:00:00', // config panel typical pause times, default: 30 min.
   };
 
-  var modules = {
-    0: {
-      "title": "Gehen",
-      "subtitle": "frühestens",
-      "syntax": {
-        0: "A",
-        1: "+",
-        2: "8:00:00",
-        3: "+",
-        4: "P",
-        5: "-",
-        6: "G",
-      },
-      'position': 5,
-    },
-    1: {
-      "title": "Gehen",
-      "subtitle": "vorraussichtlich",
-      "syntax": {
-        0: "A",
-        1: "+",
-        2: "8:00:00",
-        3: "+",
-        4: "P"
-      },
-      'position': 5,
-    },
-    2: {
-      "title": "Pause",
-      "subtitle": "spätestens",
-      "syntax": {
-        0: "A",
-        1: "+",
-        2: "6:00:00",
-      },
-      'position': 10,
-    },
-    3: {
-      "title": "Verbleibend (h)",
-      "subtitle": "",
-      "syntax": {
-        0: "R",
-      },
-      'position': 12,
-    }
-  }
-
   if (comeTimeElement && pauseTimeElement && gleitzeitTimeElement && tableBody) {
     var comeTime = comeTimeElement.getAttribute('title');
     var pauseTime = pauseTimeElement.getAttribute('title');
@@ -72,17 +25,81 @@ function calcFeierabend() {
         pauseTimes['seconds'] = pausenDauer['seconds'];
         
         pauseTime = unsplitTime(pauseTimes);
+        livePauseTime = pauseTime;
+      }else {
+        livePauseTime = '00:00:00';
       }
 
       var leaveTime = calcNewTime(calcNewTime(comeTime, '8:00:00', 'add'), pauseTime);
 
+      var modules = {
+        0: {
+          "title": "Gehen",
+          "subtitle": "frühestens",
+          "syntax": {
+            0: "A",
+            1: "+",
+            2: "8:00:00",
+            3: "+",
+            4: "P",
+            5: "-",
+            6: "G",
+          },
+          'position': 5,
+        },
+        1: {
+          "title": "Gehen",
+          "subtitle": "vorraussichtlich",
+          "syntax": {
+            0: "A",
+            1: "+",
+            2: "8:00:00",
+            3: "+",
+            4: "P"
+          },
+          'position': 5,
+        },
+        2: {
+          "title": "Pause",
+          "subtitle": "spätestens",
+          "syntax": {
+            0: "A",
+            1: "+",
+            2: "6:00:00",
+          },
+          'position': 10,
+        },
+        3: {
+          "title": "Verbleibend (h)",
+          "subtitle": "Total",
+          "syntax": {
+            0: "R",
+          },
+          'position': 12,
+        },
+        4: {
+          "title": "Verbleibend (h)",
+          "subtitle": "Arbeitszeit",
+          "syntax": {
+            0: "R",
+            1: '-',
+            2: livePauseTime,
+          },
+          'position': 12,
+        }
+      }
+
       console.log('A:'+comeTime);
       console.log('P:'+pauseTime);
+      console.log('left P time:'+livePauseTime);
       console.log('L:'+leaveTime);
       console.log('G:'+gleitzeitTime);
       
+      var moduleIteration = 0;
       $.each(modules, function(key, value) {
         $(value).each(function() {
+          moduleIteration++;
+
           var id = key;
           var title = this['title'];
           var subtitle = this['subtitle'];
@@ -100,7 +117,7 @@ function calcFeierabend() {
 
           $(syntax).each(function() {
             iteration ++;
-            console.group(`Iteration(${iteration}) { this: ${this}, result: ${result} }`);
+            // console.group(`Iteration(${iteration}) { this: ${this}, result: ${result} }`);
 
             if(this == 'A') { // beginn
               variable = comeTime;
@@ -132,12 +149,12 @@ function calcFeierabend() {
               operator = '';
               result = calcNewTime(result, variable, 'subtract');
             }
-            console.log(`Operator: ${operator}, Variable: ${variable}, Result: ${result}`)
-            console.groupEnd();
+            // console.log(`Operator: ${operator}, Variable: ${variable}, Result: ${result}`)
+            // console.groupEnd();
 
           });
-
-          makeRow('modul'+iteration, title, subtitle, result, position);
+          // console.log(`modul+${moduleIteration}, ${title}, ${subtitle}, ${result}, ${position}`);
+          makeRow('modul'+moduleIteration, title, subtitle, result, position);
 
         });
       });
