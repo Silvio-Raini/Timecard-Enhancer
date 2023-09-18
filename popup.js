@@ -114,63 +114,8 @@ $(document).ready(function() {
     }
   });
 
-  $('button[name="delete"]').click(function() {
-    
-    // var deleteID = $(this).attr('value');
-    // if(deleteID !== undefined) {
-    //   readData()
-    //     .then((data) =>  {
-    //       var usualPauseTime = document.getElementById('usualPauseTime').value;
-    //       var usualPauseStart = document.getElementById('usualPauseStart').value;
-    //       var modules = ((data['modules']) ? data['modules'] : {});
-
-    //       if($(modules).length > 0) {
-    //         var newModules = [];
-
-    //         $.each(modules, function(key, value) {
-    //           $(value).each(function() {
-    //             var id = ((this['id']) ? this['id'] : 1);
-    //             var title = ((this['title']) ? this['title'] : '');
-    //             var subtitle = ((this['subtitle']) ? this['subtitle'] : '');
-    //             var position = ((this['position']) ? this['position'] : 1);
-
-    //             var syntax = [];
-    //             $.each(this['syntax'], function(step, val) {
-    //               syntax.push(val);
-    //             });
-                
-    //             var module = {
-    //               "id": id,
-    //               "title": title,
-    //               "subtitle": subtitle,
-    //               "position": position,
-    //               "syntax": syntax
-    //             }
-    //             if(editedModule['id'] == deleteID) {
-                  
-    //             }else {
-    //               newModules.push(module);
-    //             }
-    //           });
-    //         });
-
-    //         var newData = {
-    //           "usualPauseStart": usualPauseStart,
-    //           "usualPauseTime": usualPauseTime,
-    //           "modules": newModules
-    //         };
-    //         clearData();
-    //         writeData(newData);
-                      
-    //         $('div#editor').css('visibility','hidden');
-
-    //         // updatePanel();
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       console.error(error);
-    //     });
-    // }
+  $(document).on('click', 'button[name="delete"]', function() {
+    remove($(this).attr('value'));
   });
 
 
@@ -250,6 +195,62 @@ function save() {
     .catch((error) => {
       console.error(error);
     });
+}
+function remove(deleteID) {
+  if(deleteID !== undefined) {
+    readData()
+      .then((data) =>  {
+        var usualPauseTime = document.getElementById('usualPauseTime').value;
+        var usualPauseStart = document.getElementById('usualPauseStart').value;
+        var modules = ((data['modules']) ? data['modules'] : {});
+
+        if($(modules).length > 0) {
+          var newModules = [];
+
+          $.each(modules, function(key, value) {
+            $(value).each(function() {
+              var id = ((this['id']) ? this['id'] : 1);
+              var title = ((this['title']) ? this['title'] : '');
+              var subtitle = ((this['subtitle']) ? this['subtitle'] : '');
+              var position = ((this['position']) ? this['position'] : 1);
+
+              var syntax = [];
+              $.each(this['syntax'], function(step, val) {
+                syntax.push(val);
+              });
+              
+              var module = {
+                "id": id,
+                "title": title,
+                "subtitle": subtitle,
+                "position": position,
+                "syntax": syntax
+              }
+              if(module['id'] == deleteID) {
+                
+              }else {
+                newModules.push(module);
+              }
+            });
+          });
+
+          var newData = {
+            "usualPauseStart": usualPauseStart,
+            "usualPauseTime": usualPauseTime,
+            "modules": newModules
+          };
+
+          $('button[name="edit"][value="'+deleteID+'"]').parent().remove();
+          clearData();
+          writeData(newData);
+                    
+          $('div#editor').css('visibility','hidden'); 
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
 }
 
 function getEdit(readable = false) {

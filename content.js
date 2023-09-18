@@ -4,221 +4,108 @@ function calcFeierabend() {
   var gleitzeitTimeElement = document.querySelector('#details-0 > table > tbody > tr:nth-child(4) > td.col-2.rsct-alignright');
   var tableBody = document.querySelector('#balances-daily tbody');
 
-  var config = {
-    'standard_pausenzeit': '00:30:00', // config panel typical pause times, default: 30 min.
-    'standard_pausenbeginn': '06:00:00', // config panel typical pause times, default: 30 min.
-  };
-
   if (comeTimeElement && pauseTimeElement && gleitzeitTimeElement && tableBody) {
     var comeTime = comeTimeElement.getAttribute('title');
     var pauseTime = pauseTimeElement.getAttribute('title');
     var gleitzeitTime = gleitzeitTimeElement.getAttribute('title');
 
     if (comeTime && pauseTime && gleitzeitTime) {
-      var pauseTimes = splitTime(pauseTime);
 
-      if(pauseTimes['hours'] == 0 && pauseTimes['minutes'] == 0 && pauseTimes['seconds'] == 0) {
-        var pausenDauer = splitTime(config['standard_pausenzeit']);
+      readData()
+        .then((data) =>  {
+          var usualPauseTime = ((data['usualPauseTime']) ? data['usualPauseTime'] : '00:30:00');
+          var usualPauseStart = ((data['usualPauseStart']) ? data['usualPauseStart'] : '12:00:00');
 
-        pauseTimes['hours'] = pausenDauer['hours'];
-        pauseTimes['minutes'] = pausenDauer['minutes'];
-        pauseTimes['seconds'] = pausenDauer['seconds'];
-        
-        pauseTime = unsplitTime(pauseTimes);
-        livePauseTime = pauseTime;
-      }else {
-        livePauseTime = '00:00:00';
-      }
+          var pauseTimes = splitTime(pauseTime);
 
-      var leaveTime = calcNewTime(calcNewTime(comeTime, '8:00:00', 'add'), pauseTime);
+          if(pauseTimes['hours'] == 0 && pauseTimes['minutes'] == 0 && pauseTimes['seconds'] == 0) {
+            var pausenDauer = splitTime(usualPauseTime);
+            pauseTime = unsplitTime(pausenDauer);
+            livePauseTime = pauseTime;
+          }else {
+            livePauseTime = '00:00:00';
+          }
 
-      var modules = {
-        0: {
-          "title": "Gehen",
-          "subtitle": "frühestens",
-          "syntax": {
-            0: "A",
-            1: "+",
-            2: "8:00:00",
-            3: "+",
-            4: "P",
-            5: "-",
-            6: "G",
-          },
-          'position': 5,
-        },
-        1: {
-          "title": "Gehen",
-          "subtitle": "vorraussichtlich",
-          "syntax": {
-            0: "A",
-            1: "+",
-            2: "8:00:00",
-            3: "+",
-            4: "P"
-          },
-          'position': 5,
-        },
-        2: {
-          "title": "Pause",
-          "subtitle": "spätestens",
-          "syntax": {
-            0: "A",
-            1: "+",
-            2: "6:00:00",
-          },
-          'position': 10,
-        },
-        3: {
-          "title": "Verbleibend (h)",
-          "subtitle": "Total",
-          "syntax": {
-            0: "R",
-          },
-          'position': 12,
-        },
-        4: {
-          "title": "Verbleibend (h)",
-          "subtitle": "Arbeitszeit",
-          "syntax": {
-            0: "R",
-            1: '-',
-            2: livePauseTime,
-          },
-          'position': 12,
-        }
-      }
-
-      console.log('A:'+comeTime);
-      console.log('P:'+pauseTime);
-      console.log('left P time:'+livePauseTime);
-      console.log('L:'+leaveTime);
-      console.log('G:'+gleitzeitTime);
-      
-      var moduleIteration = 0;
-      $.each(modules, function(key, value) {
-        $(value).each(function() {
-          moduleIteration++;
-
-          var id = key;
-          var title = this['title'];
-          var subtitle = this['subtitle'];
-          var position = this['position'];
-          position --;
-          var syntax = [];
-          $.each(this['syntax'], function(step, val) {
-            syntax.push(val);
-          });
-
-          var result = '00:00:00';
-          var operator = '';
-          var variable = '00:00:00';
-          var iteration = 0;
-
-          $(syntax).each(function() {
-            iteration ++;
-            // console.group(`Iteration(${iteration}) { this: ${this}, result: ${result} }`);
-
-            if(this == 'A') { // beginn
-              variable = comeTime;
-            }else if(this == 'P') { // pause
-              variable = pauseTime;
-            }else if(this == 'L') { // leave
-              variable = leaveTime;
-            }else if(this == 'G') { // gleitzeit
-              variable = gleitzeitTime;
-            }else if(this == 'R') { // rest
-              variable = calcRemainingTime(leaveTime);
-            }else if(this == '+') {
-              operator = '+';
-              variable = '';
-            }else if(this == '-') {
-              operator = '-';
-              variable = '';
-            }else if(this.includes(':')) {
-              variable = this;
-            }else {
-              variable = '00:00:00';
-            }
-
-            if(operator == '+' && variable.length > 0 || iteration == 1) {
-              operator = '';
-              result = calcNewTime(result, variable, 'add');
+          var leaveTime = calcNewTime(calcNewTime(comeTime, '8:00:00', 'add'), pauseTime);
               
-            }else if(operator == '-' && variable.length > 0) {
-              operator = '';
-              result = calcNewTime(result, variable, 'subtract');
-            }
-            // console.log(`Operator: ${operator}, Variable: ${variable}, Result: ${result}`)
-            // console.groupEnd();
+          console.log('Arbeitsbeginn = A:'+comeTime);
+          console.log('Typische Pausenzeit = P:'+pauseTime);
+          console.log('Verbleibende Pausenzeit = LP:'+livePauseTime);
+          console.log('Feierabend = L:'+leaveTime);
+          console.log('Gleitzeit = G:'+gleitzeitTime);
 
-          });
-          // console.log(`modul+${moduleIteration}, ${title}, ${subtitle}, ${result}, ${position}`);
-          makeRow('modul'+moduleIteration, title, subtitle, result, position);
+          var modules = ((data['modules']) ? data['modules'] : {});
 
+          if($(modules).length > 0) {
+
+            $.each(modules, function(key, value) {
+              $(value).each(function() {
+
+                var id = key;
+                var title = this['title'];
+                var subtitle = this['subtitle'];
+                var position = this['position'];
+                if(position > 1) {
+                  position --;
+                }
+
+                var syntax = [];
+                $.each(this['syntax'], function(step, val) {
+                  syntax.push(val);
+                });
+
+                var result = '00:00:00';
+                var operator = '';
+                var variable = '00:00:00';
+                var iteration = 0;
+                
+                $(syntax).each(function() {
+                  iteration ++;
+                  // console.group(`Iteration(${iteration}) { this: ${this}, result: ${result} }`);
+            
+                  if(this == 'A') { // beginn
+                    variable = comeTime;
+                  }else if(this == 'P') { // pause
+                    variable = pauseTime;
+                  }else if(this == 'L') { // leave
+                    variable = leaveTime;
+                  }else if(this == 'G') { // gleitzeit
+                    variable = gleitzeitTime;
+                  }else if(this == 'R') { // rest
+                    variable = calcRemainingTime(leaveTime);
+                  }else if(this == '+') {
+                    operator = '+';
+                    variable = '';
+                  }else if(this == '-') {
+                    operator = '-';
+                    variable = '';
+                  }else if(this.includes(':')) {
+                    variable = this;
+                  }else {
+                    variable = '00:00:00';
+                  }
+            
+                  if(operator == '+' && variable.length > 0 || iteration == 1) {
+                    operator = '';
+                    result = calcNewTime(result, variable, 'add');
+                    
+                  }else if(operator == '-' && variable.length > 0) {
+                    operator = '';
+                    result = calcNewTime(result, variable, 'subtract');
+                  }
+                  // console.log(`Operator: ${operator}, Variable: ${variable}, Result: ${result}`)
+                  // console.groupEnd();
+            
+                });
+                // console.log(`modul+${id}, ${title}, ${subtitle}, ${result}, ${position}`);
+                makeRow('modul'+id, title, subtitle, result, position);
+              });
+            });
+          }
+        })
+        .catch((error) => {
+          console.error(error);
         });
-      });
-
-      /*
-      var pauseTimeParts = pauseTime.split(':');
-      var pauseHours = parseInt(pauseTimeParts[0]);
-      var pauseMinutes = parseInt(pauseTimeParts[1]);
-      var pauseSeconds = parseInt(pauseTimeParts[2] || 0);
-
-      if(pauseHours == 0 && pauseMinutes == 0 && pauseSeconds == 0) {
-        pauseMinutes = config['standard_pausenzeit'];
-      }
-
-      var leaveTime = calcNewTime(comeTime.toString(), (pauseHours + 8).toString().padStart(2, '0')+':'+pauseMinutes.toString().padStart(2, '0')+':'+pauseSeconds.toString().padStart(2, '0'));
-
-      var remainingTime = calcRemainingTime(leaveTime);
-
-      var earlyEndTime = calcNewTime(leaveTime.toString(), gleitzeitTime.toString(), 'subtract');
-
-      var ltsPauseTime = calcNewTime(comeTime, '06:00:00', 'add');
-
-      
-      var existingPauseRow = document.getElementById('ltspause');
-      var existingeErlyEndRow = document.getElementById('earlyend');
-      var existingFeierabendRow = document.getElementById("feierabend");
-      var existingReamingtimeRow = document.getElementById("remeaningtime");
-
-      if(pauseSeconds == 0 && pauseMinutes == 30 && pauseHours == 0) { // solange Pause absolut perfekt ist bzw. nicht begonnen wurde:
-        if (existingPauseRow) {
-          existingPauseRow.querySelector('.rsct-align-right').innerText = ltsPauseTime;
-        } else {
-          makeRow('ltspause', 'Pause <span style="font-size: 1rem;opacity: 0.75;position: absolute;top: 50%;right: -4.5rem;transform: translateY(-50%);">spätmöglichst</span></td><td class="col-2 rsct-alignright" title="'+ltsPauseTime+'">'+ltsPauseTime.substring(0, ltsPauseTime.length - 3) + '</td>', '#balances-daily tbody tr:nth-child(4)');
-        } 
-      }
-
-      if (existingReamingtimeRow) {
-        existingReamingtimeRow.querySelector('.rsct-alignright').innerText = remainingTime;
-      } else {
-        makeRow('remeaningtime', 'Verbleibend (h)</td><td class="col-2 rsct-alignright" title="'+remainingTime+'">' + ((remainingTime.includes('+')) ? remainingTime.substring(0, remainingTime.length - 3) : remainingTime.substring(1, remainingTime.length - 3)) + '</td>', '#balances-daily tbody tr:nth-child(9)');
-      }
-
-      if (existingFeierabendRow) {
-        existingFeierabendRow.querySelector('.rsct-alignright').innerText = leaveTime;
-      } else {
-        makeRow('feierabend', 'Gehen <span style="font-size: 1rem;opacity: 0.75;position: absolute;top: 50%;right: -4.5rem;transform: translateY(-50%);">vorraussichtlich</span></td><td class="col-2 rsct-alignright" title="'+leaveTime+'">' + leaveTime.substring(0, leaveTime.length - 3) + '</td>', '#balances-daily tbody tr:nth-child(4)');
-      }
-
-      if (existingeErlyEndRow) {
-        existingeErlyEndRow.querySelector('.rsct-align-right').innerText = earlyEndTime;
-      } else {  
-        var now = new Date();
-        var nowHours = now.getHours();
-        var nowMinutes = now.getMinutes();
-        var nowSeconds = now.getSeconds();
-        var earlyEndParts = earlyEndTime.split(':');
-
-        var reached = false;
-        if(earlyEndParts[0] <= nowHours && earlyEndParts[1] <= nowMinutes && earlyEndParts[2] <= nowSeconds) {
-          var reached = true;
-        }
-
-        makeRow('earlyend', 'Gehen <span style="font-size: 1rem;opacity: 0.75;position: absolute;top: 50%;right: -4.5rem;transform: translateY(-50%);">frühestens</span></td><td class="col-2 rsct-alignright" title="'+earlyEndTime+'">'+earlyEndTime.substring(0, earlyEndTime.length - 3) + '</td>', '#balances-daily tbody tr:nth-child(4)', reached);
-      }*/
     }
   }
 }
@@ -379,3 +266,26 @@ function checkAndInit() {
 
 // Run the checkAndInit function when the page loads
 window.addEventListener("load", checkAndInit);
+
+
+function readData(key = null) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(key, function(data) {
+      if(chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      }else {
+        if(data !== null && data !== undefined) {
+          if(key !== null && data[key] !== undefined) {
+            resolve(data[key]);
+          }else {
+            resolve(data);
+          }
+        }else {
+          $('#alert span').html('Lesen fehlgeschlagen');
+          $('#alert').addClass('animate');
+          reject('Lesen fehlgeschlagen');
+        }
+      }
+    });
+  });
+}
