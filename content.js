@@ -1,113 +1,128 @@
-function calcFeierabend() {
-  var comeTimeElement = document.getElementById('firstco');
-  var pauseTimeElement = document.getElementById('breaktime');
-  var gleitzeitTimeElement = document.querySelector('#details-0 > table > tbody > tr:nth-child(4) > td.col-2.rsct-alignright');
-  var tableBody = document.querySelector('#balances-daily tbody');
+var config = {
+  'usualPauseStart': '12:00:00',
+  'usualPauseTime': '00:30:00',
+}
 
-  if (comeTimeElement && pauseTimeElement && gleitzeitTimeElement && tableBody) {
-    var comeTime = comeTimeElement.getAttribute('title');
-    var pauseTime = pauseTimeElement.getAttribute('title');
-    var gleitzeitTime = gleitzeitTimeElement.getAttribute('title');
+async function updateFrame() {
 
-    if (comeTime && pauseTime && gleitzeitTime) {
+  var data = await readData();
+  config.usualPauseStart = ((data['usualPauseStart']) ? data['usualPauseStart'] : config.usualPauseStart);
+  config.usualPauseTime = ((data['usualPauseTime']) ? data['usualPauseTime'] : config.usualPauseTime);
 
-      readData()
-        .then((data) =>  {
-          var usualPauseTime = ((data['usualPauseTime']) ? data['usualPauseTime'] : '00:30:00');
-          var usualPauseStart = ((data['usualPauseStart']) ? data['usualPauseStart'] : '12:00:00');
+  var variables = getVariables();
+  console.log(variables);
 
-          var pauseTimes = splitTime(pauseTime);
+  var modules = ((data['modules']) ? data['modules'] : []);
+  
+  if($(modules).length > 0) {
+    $.each(modules, function(key, value) {
+      $(value).each(function() {
+        var id = key;
+        var title = this['title'];
+        var subtitle = this['subtitle'];
+        var position = ((this['position'] > 1) ? this['position']-- : this['position']);
+        var syntax = this['syntax'];
 
-          if(pauseTimes['hours'] == 0 && pauseTimes['minutes'] == 0 && pauseTimes['seconds'] == 0) {
-            var pausenDauer = splitTime(usualPauseTime);
-            pauseTime = unsplitTime(pausenDauer);
-            livePauseTime = pauseTime;
+        var result = '00:00:00';
+        var operator = 'add';
+        var variable = '00:00:00';
+        var iteration = 0;
+        
+        $(syntax).each(function() {
+          iteration++;
+          // console.group(`Iteration(${iteration}) { this: ${this}, result: ${result} }`);
+            
+          if(this == 'A') {
+            variable = variables[this];
+          }else if(this == 'AW') {
+            variable = variables[this];
+          }else if(this == 'AB') {
+            variable = variables[this];
+          }else if(this == 'RP') {
+            variable = variables[this];
+          }else if(this == 'P') {
+            variable = variables[this];
+          }else if(this == 'L') {
+            variable = variables[this];
+          }else if(this == 'G') {
+            variable = variables[this];
+          }else if(this == 'R') {
+            variable = variables[this];
+          }else if(this == '+') {
+            operator = 'add';
+            variable = '';
+          }else if(this == '-') {
+            operator = 'subtract';
+            variable = '';
+          }else if(this.includes(':')) {
+            variable = this;
           }else {
-            livePauseTime = '00:00:00';
+            variable = '00:00:00';
           }
 
-          var leaveTime = calcNewTime(calcNewTime(comeTime, '8:00:00', 'add'), pauseTime);
-              
-          console.log('Arbeitsbeginn = A:'+comeTime);
-          console.log('Typische Pausenzeit = P:'+pauseTime);
-          console.log('Verbleibende Pausenzeit = LP:'+livePauseTime);
-          console.log('Feierabend = L:'+leaveTime);
-          console.log('Gleitzeit = G:'+gleitzeitTime);
-
-          var modules = ((data['modules']) ? data['modules'] : {});
-
-          if($(modules).length > 0) {
-
-            $.each(modules, function(key, value) {
-              $(value).each(function() {
-
-                var id = key;
-                var title = this['title'];
-                var subtitle = this['subtitle'];
-                var position = this['position'];
-                if(position > 1) {
-                  position --;
-                }
-
-                var syntax = [];
-                $.each(this['syntax'], function(step, val) {
-                  syntax.push(val);
-                });
-
-                var result = '00:00:00';
-                var operator = '';
-                var variable = '00:00:00';
-                var iteration = 0;
-                
-                $(syntax).each(function() {
-                  iteration ++;
-                  // console.group(`Iteration(${iteration}) { this: ${this}, result: ${result} }`);
-            
-                  if(this == 'A') { // beginn
-                    variable = comeTime;
-                  }else if(this == 'P') { // pause
-                    variable = pauseTime;
-                  }else if(this == 'L') { // leave
-                    variable = leaveTime;
-                  }else if(this == 'G') { // gleitzeit
-                    variable = gleitzeitTime;
-                  }else if(this == 'R') { // rest
-                    variable = calcRemainingTime(leaveTime);
-                  }else if(this == '+') {
-                    operator = '+';
-                    variable = '';
-                  }else if(this == '-') {
-                    operator = '-';
-                    variable = '';
-                  }else if(this.includes(':')) {
-                    variable = this;
-                  }else {
-                    variable = '00:00:00';
-                  }
-            
-                  if(operator == '+' && variable.length > 0 || iteration == 1) {
-                    operator = '';
-                    result = calcNewTime(result, variable, 'add');
-                    
-                  }else if(operator == '-' && variable.length > 0) {
-                    operator = '';
-                    result = calcNewTime(result, variable, 'subtract');
-                  }
-                  // console.log(`Operator: ${operator}, Variable: ${variable}, Result: ${result}`)
-                  // console.groupEnd();
-            
-                });
-                // console.log(`modul+${id}, ${title}, ${subtitle}, ${result}, ${position}`);
-                makeRow('modul'+id, title, subtitle, result, position);
-              });
-            });
+          if(operator.length > 0 && variable.length > 0) {
+            result = calcNewTime(result, variable, operator);
+            operator = '';
           }
-        })
-        .catch((error) => {
-          console.error(error);
+          // console.log(`Operator: ${operator}, Variable: ${variable}, Result: ${result}`)
+          // console.groupEnd();
         });
-    }
+        console.log(`modul+${id}, ${title}, ${subtitle}, ${result}, ${position}`);
+        makeRow('modul'+id, title, subtitle, result, position);
+      });
+    });
   }
+
+}
+
+function getVariables() {
+  // reading
+  var kommenTime = $('#firstco').attr('title');
+  var pausenzeitTime = $('#breaktime').attr('title');
+  var anwesenheitTime = $('#totaltime').attr('title');
+  var arbeitszeitTime = $('#workingtime').attr('title');
+  var gleitzeitTime = $('#details-0 > table > tbody > tr:nth-child(4) > td.col-2.rsct-alignright').attr('title');
+
+  // calculating
+  var restpauseTime = null;
+  var pausenzeitTimes = splitTime(pausenzeitTime);
+  if(pausenzeitTimes['hours'] == 0 && pausenzeitTimes['minutes'] == 0 && pausenzeitTimes['seconds'] == 0) {
+    pauseTime = unsplitTime(splitTime(config.usualPauseTime)); // split + unsplit = fix time (valid)
+    restpauseTime = pausenzeitTime;
+  }else {
+    restpauseTime = '00:00:00'; // geht besser
+  }
+
+  var gehenTime = calcNewTime(calcNewTime(kommenTime, '08:00:00', 'add'), pausenzeitTime, 'add');
+  var verbleibendTime = calcRemainingTime(gehenTime);
+
+
+  var variables = {
+    'A': kommenTime, // kommen
+    'AW': anwesenheitTime, // anwesenheit
+    'AB': arbeitszeitTime, // arbeitszeit
+    'P': pausenzeitTime, // pause gewöhnlich
+    'RP': restpauseTime, // restpause
+    'G': gleitzeitTime, // gleitzeit
+    'L': gehenTime, // gehen
+    'R': verbleibendTime, // verbleibend
+  };
+
+  return variables;
+}
+
+async function readData(key = null) {
+  var result = await chrome.storage.local.get(key);
+
+  if(chrome.runtime.lastError) {
+    console.error(chrome.runtime.lastError);
+    $('#alert span').html('Lesen fehlgeschlagen');
+  }else {
+    $('#alert span').html('Lesen erfolgreich');
+  }
+  // $('#alert').addClass('animate');
+    
+  return result;
 }
 
 function makeRow(id, title, subtitle, value, position, reached = false) {
@@ -122,7 +137,6 @@ function makeRow(id, title, subtitle, value, position, reached = false) {
   
     $('#balances-daily tbody tr:nth-child('+position+')').after(newRow);
   }
-  
 }
 
 /**
@@ -201,7 +215,12 @@ function splitTime(time) {
 
   return result
 } 
+
 function unsplitTime(splittedTime) {
+  splittedTime['hours'] = ((splittedTime['hours']) ? splittedTime['hours'] : (splittedTime[0]) ? splittedTime[0] : 0);
+  splittedTime['minutes'] = ((splittedTime['minutes']) ? splittedTime['minutes'] : (splittedTime[1]) ? splittedTime[1] : 0);
+  splittedTime['seconds'] = ((splittedTime['seconds']) ? splittedTime['seconds'] : (splittedTime[2]) ? splittedTime[2] : 0);
+
   var string = ''+ splittedTime['hours'].toString().padStart(2,'0')+':'+splittedTime['minutes'].toString().padStart(2,'0')+':'+splittedTime['seconds'].toString().padStart(2,'0');
   return string;
 }
@@ -212,20 +231,22 @@ function calcRemainingTime(leaveTime) {
   var currentMinutes = now.getMinutes();
   var currentSeconds = now.getSeconds();
 
-  const leaveTimeParts = leaveTime.split(':');
-  const leaveHours = parseInt(leaveTimeParts[0]);
-  const leaveMinutes = parseInt(leaveTimeParts[1]);
-  const leaveSeconds = parseInt(leaveTimeParts[2] || 0);
+  const leaveTimeParts = splitTime(leaveTime);
 
-  const timeDifference = ((leaveHours - currentHours) * 3600 + (leaveMinutes - currentMinutes) * 60 + (leaveSeconds - currentSeconds));
+  const timeDifference = ((leaveTimeParts['hours'] - currentHours) * 3600 + (leaveTimeParts['minutes'] - currentMinutes) * 60 + (leaveTimeParts['seconds'] - currentSeconds));
 
   const hours = Math.floor(timeDifference / 3600);
   const minutes = Math.floor((timeDifference % 3600) / 60);
   const seconds = timeDifference % 60;
+  var newTime = {
+    'hours': hours,
+    'minutes': minutes,
+    'seconds': seconds,
+  };
 
-  var remainingTime = hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+  var remainingTime = unsplitTime(newTime);
   
-  if(timeDifference < 0) {
+  if(timeDifference < 0) { // wenn überstunden
     var addition = Math.abs(timeDifference);
     var remainingTime = new Date(addition * 1000).toISOString().substring(11, 19);
     var remainingTime = '+'+remainingTime;
@@ -233,6 +254,7 @@ function calcRemainingTime(leaveTime) {
   return remainingTime;
 }
   
+
 // Funktion zur Initialisierung des Mutation Observers
 function initMutationObserver() {
   const targetNode = document.querySelector(".rsct-header.date-header");
@@ -256,7 +278,7 @@ function checkAndInit() {
   if (workingProfile) {
     if (workingProfile.innerHTML != "") {
       initMutationObserver();
-      calcFeierabend();
+      updateFrame();
     } else {
       setTimeout(checkAndInit, 500); // Überprüfe alle 500 ms erneut
     }
@@ -266,26 +288,3 @@ function checkAndInit() {
 
 // Run the checkAndInit function when the page loads
 window.addEventListener("load", checkAndInit);
-
-
-function readData(key = null) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get(key, function(data) {
-      if(chrome.runtime.lastError) {
-        reject(chrome.runtime.lastError);
-      }else {
-        if(data !== null && data !== undefined) {
-          if(key !== null && data[key] !== undefined) {
-            resolve(data[key]);
-          }else {
-            resolve(data);
-          }
-        }else {
-          $('#alert span').html('Lesen fehlgeschlagen');
-          $('#alert').addClass('animate');
-          reject('Lesen fehlgeschlagen');
-        }
-      }
-    });
-  });
-}

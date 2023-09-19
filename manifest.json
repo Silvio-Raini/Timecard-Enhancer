@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Timecard Enhancer™",
-  "version": "1.3",
+  "version": "1.4",
   "author": "Noah Pieles, Silvio Heim",
   "description": "Berechnet den vorraussichtlichen Feierabend, die spätmöglichste Pause oder was auch immer du dir berechnen lassen möchtest!",
   "permissions": ["activeTab", "scripting", "storage"],
@@ -13,7 +13,7 @@
   "content_scripts": [
     {
       "matches": ["https://timecard10-local.nol-is.de/*"],
-      "js": ["content.js", "jquery.js"]
+      "js": ["jquery.js", "content.js"]
     }
   ],
   "icons": {

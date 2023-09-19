@@ -268,40 +268,7 @@
 
     <button type="button" id="save" name="save">Speichern</button>
 
-    <div id="editor">
-      <div class="input">
-        <label for="editName" title="Bezeichnung des Moduls">Name</label>
-        <input id="editName" name="editName" type="text">
-      </div>
-
-      <div class="input">
-        <label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label>
-        <input id="editBeschreibung" name="editBeschreibung" type="text">
-      </div>
-
-      <div class="input" style="height: auto; padding-bottom: 1rem;">
-        <label title="Rechenweg des Moduls">Berechnung</label>
-        <div>
-          <select>
-            <option value="empty" disabled selected>Variable wählen</option>
-            <option value="A">Arbeitsbeginn</option>
-            <option value="P">Pausenzeit</option>
-            <option value="L">Feierabend</option>
-            <option value="G">Gleitzeit</option>
-            <option value="R">Verbleibend</option>
-            <option value="time">Zeit</option>
-          </select>
-          <button name="add">+</button>
-        </div>
-      </div>
-
-      <div class="input">
-        <label for="editPosition" title="Position des Moduls">Position</label>
-        <input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1">
-      </div>
-
-      <button name="editSave">Speichern</button>
-    </div>
+    <div id="editor"></div>
 
     <div id="alert">
       <span></span>
