@@ -4,13 +4,11 @@ var config = {
 }
 
 async function updateFrame() {
-
   var data = await readData();
   config.usualPauseStart = ((data['usualPauseStart']) ? data['usualPauseStart'] : config.usualPauseStart);
   config.usualPauseTime = ((data['usualPauseTime']) ? data['usualPauseTime'] : config.usualPauseTime);
 
-  var variables = getVariables();
-  console.log(variables);
+  var variables = await getVariables();
 
   var modules = ((data['modules']) ? data['modules'] : []);
   
@@ -69,15 +67,14 @@ async function updateFrame() {
           // console.log(`Operator: ${operator}, Variable: ${variable}, Result: ${result}`)
           // console.groupEnd();
         });
-        console.log(`modul+${id}, ${title}, ${subtitle}, ${result}, ${position}`);
+        // console.log(`modul+${id}, ${title}, ${subtitle}, ${result}, ${position}`);
         makeRow('modul'+id, title, subtitle, result, position);
       });
     });
   }
-
 }
 
-function getVariables() {
+async function getVariables() {
   // reading
   var kommenTime = $('#firstco').attr('title');
   var pausenzeitTime = $('#breaktime').attr('title');
@@ -121,6 +118,7 @@ async function readData(key = null) {
   if(chrome.runtime.lastError) {
     console.error(chrome.runtime.lastError);
     $('#alert span').html('Lesen fehlgeschlagen');
+    result = null;
   }else {
     $('#alert span').html('Lesen erfolgreich');
   }
@@ -130,8 +128,11 @@ async function readData(key = null) {
 }
 
 function makeRow(id, title, subtitle, value, position, reached = false) {
-  if($('#'+id).length) { // if exists
-    $('#'+id).find('.rsct-align-right').innerHTML = value;
+
+  var selector = '#'+id;
+  if($(selector).length) { // if exists
+    $(selector+' > td.col-2').html(((value.charAt(0) == '0') ? value.substring(1, value.length - 3) : value.substring(0, value.length - 3)));
+    $(selector+' > td.col-2').attr('title', value);
   }else {
     var newRow = document.createElement('tr');
     newRow.setAttribute("id", id);
@@ -257,7 +258,6 @@ function calcRemainingTime(leaveTime) {
   }
   return remainingTime;
 }
-  
 
 // Funktion zur Initialisierung des Mutation Observers
 function initMutationObserver() {
@@ -267,7 +267,7 @@ function initMutationObserver() {
     const observer = new MutationObserver(function (mutationsList, observer) {
       for (const mutation of mutationsList) {
         if (mutation.type === "childList") {
-          setTimeout(calcFeierabend, 1000);
+          setTimeout(updateFrame, 1000);
         }
       }
     });

@@ -227,7 +227,11 @@
       padding: 0;
     }
 
-    div.input > div > input[type="time"] {padding-right: 1.45rem;position: relative;font-size: 0.75rem;}
+    div.input > div > input[type="time"] {
+      padding-right: 1.45rem;
+      position: relative;
+      font-size: 0.75rem;
+    }
 
     div.input > div > select:after, div.input > div > input[type="time"]:after {
       position: absolute;
@@ -246,10 +250,18 @@
       background: var(--primary);
       color: var(--secondary);
     }
+    span.version {
+      float: right;
+      font-size: 0.8rem;
+      font-weight: bolder;
+      opacity: 0.8;
+      font-style: italic;
+    }
     </style>
   <body>
-    <h1>Timecard Enhancer</h1>
+    <h1>Timecard Enhancer <span class="version">v1.5</span></h1>
     <h3>Konfiguration</h3>
+    <!-- no use at the moment
     <div>
       <div class="input">
         <label for="usualPauseStart" title="Absoluter (ab 08:00:00 aufwärts) oder Relativer Zeitwert">Pausenbeginn ab:</label>
@@ -261,6 +273,7 @@
         <input id="usualPauseTime" name="usualPauseTime" type="time" step="1">
       </div>
     </div>
+    -->
     
     <div class="list">
       <div class="step"><button name="append">+ Modul erstellen</button></div>

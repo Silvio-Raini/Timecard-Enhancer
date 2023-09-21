@@ -194,8 +194,8 @@ async function remove(deleteID) {
 async function save() {
   var data = await readData();
 
-  var usualPauseTime = document.getElementById('usualPauseTime').value;
-  var usualPauseStart = document.getElementById('usualPauseStart').value;
+  // var usualPauseTime = document.getElementById('usualPauseTime').value;
+  // var usualPauseStart = document.getElementById('usualPauseStart').value;
   var modules = ((data['modules']) ? data['modules'] : []);
 
   var newModules = [];
@@ -260,10 +260,10 @@ async function updatePanel() {
   var data = await readData();
   if(typeof data == 'object') {
     var usualPauseTime = ((data['usualPauseTime']) ? data['usualPauseTime'] : '00:30:00');
-    document.getElementById('usualPauseTime').value = usualPauseTime;
+    // document.getElementById('usualPauseTime').value = usualPauseTime;
 
     var usualPauseStart = ((data['usualPauseStart']) ? data['usualPauseStart'] : '04:00:00');
-    document.getElementById('usualPauseStart').value = usualPauseStart;
+    // document.getElementById('usualPauseStart').value = usualPauseStart;
 
     var modules = ((data['modules']) ? data['modules'] : {});
 
