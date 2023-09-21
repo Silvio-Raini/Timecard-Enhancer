@@ -9,7 +9,7 @@ var nameIndexes = {
   'G': 'Gleitzeit',
   'R': 'Verbleibend',
 }
-var operatorSelectbox = '<select><option value="empty" disabled selected>Operator wählen</option><option value="+">+</option><option value="-">-</option></select>';
+var operatorSelectbox = '<select title="Operatoren auswählen"><option value="+" selected>+</option><option value="-">-</option></select>';
 
 $(document).ready(async function() {
   resetEditor();
@@ -21,6 +21,7 @@ $(document).ready(async function() {
 
   $(document).on('click', 'button[name="editSave"], button[name="save"]', async function() { // save
     $('div#editor').css('visibility','hidden');
+    $('div#editor').css('opacity','0');
     await save();
   });
 
@@ -43,14 +44,15 @@ $(document).ready(async function() {
 
   $(document).on('click', 'button[name="append"], button[name="edit"]', async function() {
 
-    $('div#editor').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung</label><div>'+makeSelectbox()+'<button name="add">+</button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div><button name="editSave">Speichern</button>');
+    $('div#editor').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name*</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung*</label><div>'+makeSelectbox()+'<button name="add"><i class="fa-solid fa-plus"></i></button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position*</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div>');
     $('div#editor').css('visibility', 'visible');
+    $('div#editor').css('opacity', '1');
 
     if($(this).attr('name') == 'edit') {
 
       var editID = $(this).val();
+      $('div#editor').append('<div><button name="editSave" title="Änderungen speichern"><i class="fa-solid fa-floppy-disk"></i></button> <button name="delete" value="'+$(this).val()+'" title="Entfernen"><i class="fa-solid fa-trash"></i></button></div>');
       $('button[name="editSave"]').attr('value', editID);
-      $('div#editor').append('<button name="delete" value="'+$(this).val()+'">Löschen</button>');
 
       var data = await readData('modules');
       console.log(data);
@@ -99,6 +101,7 @@ $(document).ready(async function() {
         }
       });
     }else {
+      $('div#editor').append('<div><button name="editSave" title="Änderungen speichern"><i class="fa-solid fa-floppy-disk"></i></button></div>');
     }
   });
 
@@ -112,14 +115,66 @@ $(document).ready(async function() {
     }else {
       if($('div#editor').css('visibility') == 'visible') {
         $('div#editor').css('visibility', 'hidden');
+        $('div#editor').css('opacity', '0');
         resetEditor();
+        $('#import').removeClass('visible');
+        $('#export').removeClass('visible');
       }
     }
+  });
+
+  $(document).on('click', 'button[name="import"]', function() {
+    $('#import').addClass('visible');
+  });
+  $(document).on('click', 'button[name="export"]', async function() {
+    $('#export').addClass('visible');
+    var data = await readData();
+    $('#export > p').html(btoa(JSON.stringify(data)));
+  });
+
+  $(document).on('click', 'button[name="share"]', async function() {
+    var id = $(this).val();
+    console.log(id);
+    var data = await readData('modules');
+    data = ((data['modules']) ? data['modules'] : '');
+
+    var json = '';
+    $(data).each(function() {
+      if(this['id'] == id) {
+        json = JSON.stringify(this);
+      }
+    });
+    if(json.length > 0) {
+      $('#export > p').html(btoa(json));
+    }
+    $('#export').addClass('visible');
+  });
+
+  $(document).on('click', 'div#export, div#import', function(e) {
+    if(e.target.id == 'import' || e.target.id == 'export') {
+      $('#import').removeClass('visible');
+      $('#export').removeClass('visible');
+    }
+  });
+  $(document).on('click', '#export > p', function() {
+    var value = $('#export > p').html();
+    navigator.clipboard.writeText(value);
+
+    $('#alert span').html('Daten kopiert');
+    $('#alert').addClass('animate');
+  });
+  $(document).on('click', 'button[name="importSend"]', function() {
+    var value = $('#import input[type="text"]').val();
+    include(value);
   });
 
   $(document).keydown(function(e) {
     if(e.which == 13) {
       save();
+    }else if(e.which == 118) {
+      share();
+    }else if(e.which == 119) {
+      include();
     }
   });
 });
@@ -186,6 +241,7 @@ async function remove(deleteID) {
     data['modules'] = newModules;
 
     $('div#editor').css('visibility','hidden'); 
+    $('div#editor').css('opacity', '0');
     $('button[name="edit"][value="'+deleteID+'"]').parent().remove();
     writeData(data);
   }
@@ -257,7 +313,7 @@ async function save() {
 }
 
 async function updatePanel() {
-  $('div.list').html('<div class="step"><button name="append">+ Modul erstellen</button></div>'); 
+  $('div.list').html(''); 
 
   var data = await readData();
   if(typeof data == 'object') {
@@ -284,11 +340,13 @@ async function updatePanel() {
             res += ' ';
           });
   
-          $('div.list').append('<div class="order'+position+'"><span class="title" title="'+title+'">'+title+'</span><span class="subtitle" title="'+subtitle+'">'+subtitle+'</span><span class="syntax" title="'+res+'">'+res+'</span><button name="edit" value="'+id+'">Bearbeiten</button></div>');
+          $('div.list').append('<div class="order'+position+'"><span class="title" title="'+title+'">'+title+'</span><span class="subtitle" title="'+subtitle+'">'+subtitle+'</span><span class="syntax" title="'+res+'">'+res+'</span><button name="edit" value="'+id+'" title="Modul bearbeiten"><i class="fa-solid fa-pen"></i></button><button name="share" value="'+id+'" title="Modul exportieren"><i class="fa-solid fa-arrow-down-to-line"></i></button></div>');
         });
       });
     }
   }
+
+  $('div.list').append('<div class="step"><button name="append" title="Modul erstellen"><i class="fa-solid fa-plus"></i> Modul erstellen</button></div>'); 
 }
 
 function key2val(param) {
@@ -367,7 +425,7 @@ function makeReadable(val) {
 function makeSelectbox(selected = 0) {
   // var result = '<select><option value="empty" disabled selected>Variable wählen</option><option value="A">Arbeitsbeginn</option><option value="AW">Anwesenheit</option><option value="P">Pausenzeit</option><option value="L">Feierabend</option><option value="G">Gleitzeit</option><option value="R">Verbleibend</option><option value="time">Zeit</option></select>';
   var result = '';
-  result += '<select>';
+  result += '<select title="Variable auswählen">';
   if(selected == 0) {
     result += ' <option value="empty" disabled'+((selected == 0) ? ' selected' : '')+'>Variable wählen</option>';
   }
@@ -387,10 +445,105 @@ function makeSelectbox(selected = 0) {
 }
 
 function resetEditor() {
-  $('div#editor').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung</label><div>'+makeSelectbox()+'<button name="add">+</button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div><button name="editSave">Speichern</button>');
+  $('div#editor').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name*</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung*</label><div>'+makeSelectbox()+'<button name="add"><i class="fa-solid fa-plus"></i></button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position*</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div><div><button name="editSave" title="Änderungen speichern"><i class="fa-solid fa-floppy-disk"></i></button></div>');
   $('input[name="editName"]').val('');
   $('input[name="editBeschreibung"]').val('');
   $('input[name="editPosition"]').val('');
   $('div#editor div.input > div').html('');
-  $('div#editor').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung</label><div>'+makeSelectbox()+'<button name="add">+</button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div><button name="editSave">Speichern</button>');
+  $('div#editor').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name*</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung*</label><div>'+makeSelectbox()+'<button name="add"><i class="fa-solid fa-plus"></i></button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position*</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div><div><button name="editSave" title="Änderungen speichern"><i class="fa-solid fa-floppy-disk"></i></button></div>');
+}
+
+/**
+ * 
+ */
+async function share() {
+  var data = await readData();
+  console.log(btoa(JSON.stringify(data)));
+}
+
+/**
+ * 
+ * @param {string} input = btoa(JSON.stringify(obj))
+ */
+async function include(input) {
+  var json = atob(input);
+  if(isJson(json)) {
+    var including_data = JSON.parse(json);
+    var success = true;
+    var highestID = 1;
+
+    var usualPauseStart = await readData('usualPauseStart');
+    var usualPauseTime = await readData('usualPauseTime');
+    var modules = ((including_data['modules']) ? including_data['modules'] : including_data);
+    console.log(including_data);
+    console.log(modules);
+
+    if($(modules.length > 0)) {
+      var data = await readData('modules');
+      data['modules'] = ((data['modules']) ? data['modules'] : []);
+
+      $(data).each(function() {
+        $.each(this, function() {
+          $(this).each(function() {
+            if(highestID < this['id']) {
+              highestID = this['id'];
+            }
+          });
+        });
+      });
+      
+      $(modules).each(function() {
+        highestID++;
+
+        var appendingModule = {
+          'id': highestID,
+          'title': ((this['title'] && this['title'].length > 0) ? this['title'] : undefined),
+          'subtitle': ((this['subtitle'] && this['subtitle'].length > 0) ? this['subtitle'] : ''),
+          'syntax': ((this['syntax'] && $(this['syntax']).length > 0) ? this['syntax'] : undefined),
+          'position': ((this['position'] && this['position'].length > 0) ? this['position'] : undefined)
+        };
+
+        if(appendingModule['title'] == undefined || appendingModule['syntax'] == undefined || appendingModule['position'] == undefined && success == true) {
+          success = false;
+        }else if(success == true) {
+          console.log(data['modules']);
+          console.log(appendingModule);
+          data['modules'].push(appendingModule);
+        }
+      });
+
+
+      var obj = {
+        'usualPauseTime': ((usualPauseTime['usualPauseTime']) ? usualPauseTime['usualPauseTime'] : '00:30:00'),
+        'usualPauseStart': ((usualPauseStart['usualPauseStart']) ? usualPauseStart['usualPauseStart'] : '12:00:00'),
+        'modules': data['modules']
+      };
+
+      console.log(obj);
+      writeData(obj);
+      updatePanel();
+    }
+
+    if(success) {
+      $('#alert span').html('Import erfolgreich!');
+    }else {
+      $('#alert span').html('Import fehlgeschlagen / unvollständig');
+    }
+    $('#alert').addClass('animate');
+  }else {
+    $('#alert span').html('Import-Daten sind Korrupt');
+    $('#alert').addClass('animate');
+  }
+
+  // var data = await readData();
+  // console.log(JSON.stringify(data));
+}
+
+function isJson(str) {
+  try {
+    JSON.parse(str);
+  } catch(e) {
+    return false;
+  }
+  return true;
 }
