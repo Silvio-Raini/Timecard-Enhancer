@@ -5,6 +5,7 @@ var nameIndexes = {
   'P': 'Pausenzeit',
   'RP': 'restl. Pausenzeit',
   'L': 'Feierabend',
+  'S': 'Sollarbeitszeit',
   'G': 'Gleitzeit',
   'R': 'Verbleibend',
 }
@@ -74,6 +75,8 @@ $(document).ready(async function() {
             }else if(this == 'RP') {
               res += makeSelectbox(key2val(this) + 1);
             }else if(this == 'L') {
+              res += makeSelectbox(key2val(this) + 1);
+            }else if(this == 'S') {
               res += makeSelectbox(key2val(this) + 1);
             }else if(this == 'G') {
               res += makeSelectbox(key2val(this) + 1);

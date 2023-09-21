@@ -44,6 +44,8 @@ async function updateFrame() {
             variable = variables[this];
           }else if(this == 'L') {
             variable = variables[this];
+          }else if(this == 'S') {
+            variable = variables[this];
           }else if(this == 'G') {
             variable = variables[this];
           }else if(this == 'R') {
@@ -81,6 +83,7 @@ function getVariables() {
   var pausenzeitTime = $('#breaktime').attr('title');
   var anwesenheitTime = $('#totaltime').attr('title');
   var arbeitszeitTime = $('#workingtime').attr('title');
+  var sollarbeitszeitTime = $('#targettime').attr('title');
   var gleitzeitTime = $('#details-0 > table > tbody > tr:nth-child(4) > td.col-2.rsct-alignright').attr('title');
 
   // calculating
@@ -104,6 +107,7 @@ function getVariables() {
     'P': pausenzeitTime, // pause gewöhnlich
     'RP': restpauseTime, // restpause
     'G': gleitzeitTime, // gleitzeit
+    'S': sollarbeitszeitTime, // gleitzeit
     'L': gehenTime, // gehen
     'R': verbleibendTime, // verbleibend
   };
