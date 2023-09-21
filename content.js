@@ -5,8 +5,8 @@ var config = {
 
 async function updateFrame() {
   var data = await readData();
-  config.usualPauseStart = ((data['usualPauseStart']) ? data['usualPauseStart'] : config.usualPauseStart);
-  config.usualPauseTime = ((data['usualPauseTime']) ? data['usualPauseTime'] : config.usualPauseTime);
+  // config.usualPauseStart = ((data['usualPauseStart']) ? data['usualPauseStart'] : config.usualPauseStart);
+  // config.usualPauseTime = ((data['usualPauseTime']) ? data['usualPauseTime'] : config.usualPauseTime);
 
   var variables = await getVariables();
 

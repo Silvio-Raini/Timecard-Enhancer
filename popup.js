@@ -194,6 +194,8 @@ async function remove(deleteID) {
 async function save() {
   var data = await readData();
 
+  var usualPauseTime = '00:30:00';
+  var usualPauseStart = '12:00:00';
   // var usualPauseTime = document.getElementById('usualPauseTime').value;
   // var usualPauseStart = document.getElementById('usualPauseStart').value;
   var modules = ((data['modules']) ? data['modules'] : []);
