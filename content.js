@@ -89,15 +89,16 @@ async function getVariables() {
   var restpauseTime = null;
   var pausenzeitTimes = splitTime(pausenzeitTime);
   if(pausenzeitTimes['hours'] == 0 && pausenzeitTimes['minutes'] == 0 && pausenzeitTimes['seconds'] == 0) {
-    // pauseTime = unsplitTime(splitTime(config.usualPauseTime)); // split + unsplit = fix time (valid)
-    pauseTime = '00:30:00';
-    restpauseTime = pauseTime;
+    // pausenzeitTimes = unsplitTime(splitTime(config.usualPauseTime)); // split + unsplit = fix time (valid)
+    pausenzeitTimes = '00:30:00';
+    restpauseTime = pausenzeitTimes;
   }else {
+    pausenzeitTimes = unsplitTime(pausenzeitTimes);
     restpauseTime = '00:00:00'; // geht besser
   }
+  
 
-  console.log(pauseTime);
-  var gehenTime = calcNewTime(calcNewTime(kommenTime, '08:00:00', 'add'), pauseTime, 'add');
+  var gehenTime = calcNewTime(calcNewTime(kommenTime, '08:00:00', 'add'), pausenzeitTimes, 'add');
   var verbleibendTime = calcRemainingTime(gehenTime);
 
 
@@ -105,7 +106,7 @@ async function getVariables() {
     'A': kommenTime, // kommen
     'AW': anwesenheitTime, // anwesenheit
     'AB': arbeitszeitTime, // arbeitszeit
-    'P': pauseTime, // pause gewöhnlich
+    'P': pausenzeitTimes, // pause gewöhnlich
     'RP': restpauseTime, // restpause
     'G': gleitzeitTime, // gleitzeit
     'S': sollarbeitszeitTime, // gleitzeit
