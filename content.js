@@ -1,7 +1,7 @@
-var config = {
-  'usualPauseStart': '12:00:00',
-  'usualPauseTime': '00:30:00',
-}
+// var config = {
+//   'usualPauseStart': '12:00:00',
+//   'usualPauseTime': '00:30:00',
+// }
 
 async function updateFrame() {
   var data = await readData();
@@ -37,8 +37,10 @@ async function updateFrame() {
           }else if(this == 'AB') {
             variable = variables[this];
           }else if(this == 'RP') {
+            console.log(variables, variables[this]);
             variable = variables[this];
           }else if(this == 'P') {
+            console.log(variables, variables[this]);
             variable = variables[this];
           }else if(this == 'L') {
             variable = variables[this];
@@ -87,13 +89,15 @@ async function getVariables() {
   var restpauseTime = null;
   var pausenzeitTimes = splitTime(pausenzeitTime);
   if(pausenzeitTimes['hours'] == 0 && pausenzeitTimes['minutes'] == 0 && pausenzeitTimes['seconds'] == 0) {
-    pauseTime = unsplitTime(splitTime(config.usualPauseTime)); // split + unsplit = fix time (valid)
-    restpauseTime = pausenzeitTime;
+    // pauseTime = unsplitTime(splitTime(config.usualPauseTime)); // split + unsplit = fix time (valid)
+    pauseTime = '00:30:00';
+    restpauseTime = pauseTime;
   }else {
     restpauseTime = '00:00:00'; // geht besser
   }
 
-  var gehenTime = calcNewTime(calcNewTime(kommenTime, '08:00:00', 'add'), pausenzeitTime, 'add');
+  console.log(pauseTime);
+  var gehenTime = calcNewTime(calcNewTime(kommenTime, '08:00:00', 'add'), pauseTime, 'add');
   var verbleibendTime = calcRemainingTime(gehenTime);
 
 
@@ -101,7 +105,7 @@ async function getVariables() {
     'A': kommenTime, // kommen
     'AW': anwesenheitTime, // anwesenheit
     'AB': arbeitszeitTime, // arbeitszeit
-    'P': pausenzeitTime, // pause gewöhnlich
+    'P': pauseTime, // pause gewöhnlich
     'RP': restpauseTime, // restpause
     'G': gleitzeitTime, // gleitzeit
     'S': sollarbeitszeitTime, // gleitzeit
