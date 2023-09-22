@@ -20,8 +20,7 @@ $(document).ready(async function() {
   });
 
   $(document).on('click', 'button[name="editSave"], button[name="save"]', async function() { // save
-    $('div#editor').css('visibility','hidden');
-    $('div#editor').css('opacity','0');
+    $('div#editor').removeClass('visible');
     await save();
   });
 
@@ -44,14 +43,14 @@ $(document).ready(async function() {
 
   $(document).on('click', 'button[name="append"], button[name="edit"]', async function() {
 
-    $('div#editor').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name*</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung*</label><div>'+makeSelectbox()+'<button name="add"><i class="fa-solid fa-plus"></i></button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position*</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div>');
-    $('div#editor').css('visibility', 'visible');
-    $('div#editor').css('opacity', '1');
+    $('div#editor > div.wrapper').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name*</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung*</label><div>'+makeSelectbox()+'<button name="add" class="hover1"><i class="fa-solid fa-plus"></i></button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position*</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div>');
+    $('div#editor').addClass('visible');
+
 
     if($(this).attr('name') == 'edit') {
 
       var editID = $(this).val();
-      $('div#editor').append('<div><button name="editSave" title="Änderungen speichern"><i class="fa-solid fa-floppy-disk"></i></button> <button name="delete" value="'+$(this).val()+'" title="Entfernen"><i class="fa-solid fa-trash"></i></button></div>');
+      $('div#editor > div.wrapper').append('<div><button name="editSave" title="Änderungen speichern" class="hover1 hoverhop"><i class="fa-solid fa-floppy-disk"></i></button> <button name="delete" value="'+$(this).val()+'" title="Entfernen" class="hover1 hoverhop"><i class="fa-solid fa-trash"></i></button></div>');
       $('button[name="editSave"]').attr('value', editID);
 
       var data = await readData('modules');
@@ -101,7 +100,7 @@ $(document).ready(async function() {
         }
       });
     }else {
-      $('div#editor').append('<div><button name="editSave" title="Änderungen speichern"><i class="fa-solid fa-floppy-disk"></i></button></div>');
+      $('div#editor > div.wrapper').append('<div><button name="editSave" title="Änderungen speichern" class="hover1 hoverhop"><i class="fa-solid fa-floppy-disk"></i></button></div>');
     }
   });
 
@@ -110,12 +109,11 @@ $(document).ready(async function() {
   });
 
   $('body, body div:not(#editor), div:not(#editor) *').click((event) => { // close editor
-    if($.contains($('div#editor')[0], event.target) || event.target.id == 'editor') {
+    if($.contains($('div#editwrap')[0], event.target) || event.target.id == 'editwrap') {
 
     }else {
       if($('div#editor').css('visibility') == 'visible') {
-        $('div#editor').css('visibility', 'hidden');
-        $('div#editor').css('opacity', '0');
+        $('div#editor').removeClass('visible'); 
         resetEditor();
         $('#import').removeClass('visible');
         $('#export').removeClass('visible');
@@ -240,8 +238,8 @@ async function remove(deleteID) {
 
     data['modules'] = newModules;
 
-    $('div#editor').css('visibility','hidden'); 
-    $('div#editor').css('opacity', '0');
+    $('div#editor').removeClass('visible');
+
     $('button[name="edit"][value="'+deleteID+'"]').parent().remove();
     writeData(data);
   }
@@ -299,7 +297,7 @@ async function save() {
     };
     writeData(newData);    
   
-    $('div#editor').html('');
+    $('div#editor > div.wrapper').html('');
     updatePanel();
     resetEditor();
   }else {
@@ -340,13 +338,13 @@ async function updatePanel() {
             res += ' ';
           });
   
-          $('div.list').append('<div class="order'+position+'"><span class="title" title="'+title+'">'+title+'</span><span class="subtitle" title="'+subtitle+'">'+subtitle+'</span><span class="syntax" title="'+res+'">'+res+'</span><button name="edit" value="'+id+'" title="Modul bearbeiten"><i class="fa-solid fa-pen"></i></button><button name="share" value="'+id+'" title="Modul exportieren"><i class="fa-solid fa-arrow-down-to-line"></i></button></div>');
+          $('div.list').append('<div class="order'+position+'"><span class="title" title="'+title+'">'+title+'</span><span class="subtitle" title="'+subtitle+'">'+subtitle+'</span><span class="syntax" title="'+res+'">'+res+'</span><button name="edit" value="'+id+'" title="Modul bearbeiten" class="hover1"><i class="fa-solid fa-pen"></i></button><button name="share" value="'+id+'" title="Modul exportieren" class="hover1"><i class="fa-solid fa-arrow-down-to-line"></i></button></div>');
         });
       });
     }
   }
 
-  $('div.list').append('<div class="step"><button name="append" title="Modul erstellen"><i class="fa-solid fa-plus"></i> Modul erstellen</button></div>'); 
+  $('div.list').append('<div class="step"><button name="append" title="Modul erstellen" class="hover1"><i class="fa-solid fa-plus"></i> Modul erstellen</button></div>'); 
 }
 
 function key2val(param) {
@@ -445,12 +443,12 @@ function makeSelectbox(selected = 0) {
 }
 
 function resetEditor() {
-  $('div#editor').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name*</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung*</label><div>'+makeSelectbox()+'<button name="add"><i class="fa-solid fa-plus"></i></button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position*</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div><div><button name="editSave" title="Änderungen speichern"><i class="fa-solid fa-floppy-disk"></i></button></div>');
+  $('div#editor > div.wrapper').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name*</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung*</label><div>'+makeSelectbox()+'<button name="add" class="hover1"><i class="fa-solid fa-plus"></i></button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position*</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div><div><button name="editSave" title="Änderungen speichern" class="hover1 hoverhop"><i class="fa-solid fa-floppy-disk"></i></button></div>');
   $('input[name="editName"]').val('');
   $('input[name="editBeschreibung"]').val('');
   $('input[name="editPosition"]').val('');
   $('div#editor div.input > div').html('');
-  $('div#editor').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name*</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung*</label><div>'+makeSelectbox()+'<button name="add"><i class="fa-solid fa-plus"></i></button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position*</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div><div><button name="editSave" title="Änderungen speichern"><i class="fa-solid fa-floppy-disk"></i></button></div>');
+  $('div#editor > div.wrapper').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name*</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung*</label><div>'+makeSelectbox()+'<button name="add" class="hover1"><i class="fa-solid fa-plus"></i></button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position*</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div><div><button name="editSave" title="Änderungen speichern" class="hover1 hoverhop"><i class="fa-solid fa-floppy-disk"></i></button></div>');
 }
 
 /**
