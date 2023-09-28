@@ -48,6 +48,17 @@ $(document).ready(async function() {
     }
   });
 
+  $(document).on('change', 'input[name="settings_url"]', function() {
+    var val = $(this).val();
+    console.log(val);
+    console.log(isURL(val));
+    if(isURL(val)) {
+      $('#frame_settings button[name="save"]').removeAttr('disabled');
+    }else {
+      $('#frame_settings button[name="save"]').attr('disabled', '');
+    }
+  });
+
   $(document).on('click', '#frame_setup > div.step3 > div.top > div > div.item:not([value="skip"])', function() {
     $(this).toggleClass('selected');
 
@@ -133,6 +144,18 @@ $(document).ready(async function() {
   });
 
   $(document).on('click', '#frame_settings button[name="return"]', async function() {
+    var data = await readData();
+    var url = ((data['url']) ? data['url'] : 'https://timecard10-local.nol-is.de/');
+    $('#settings_url').val(url);
+
+    var usualPauseTime = ((data['usualPauseTime']) ? data['usualPauseTime'] : '00:30:00');
+    $('#settings_usualPauseTime').val(usualPauseTime);
+
+    var usualPauseStart = ((data['usualPauseStart']) ? data['usualPauseStart'] : '12:00:00');
+    $('#settings_usualPauseStart').val(usualPauseStart);
+
+    $('#frame_settings button[name="save"]').removeAttr('disabled');
+
     await updatePanel();
     $('div#frame_settings').removeClass('visible');
     $('div#frame_main').addClass('visible');

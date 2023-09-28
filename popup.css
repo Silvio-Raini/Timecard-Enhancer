@@ -268,7 +268,7 @@ div.input > div > input[type="time"]:after {
   right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  content: 'ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ';
+  content: 'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“';
   font-size: 1rem;
   cursor: pointer;
 }
@@ -534,8 +534,14 @@ div#frame_main {
 }
 
 button:disabled {
+  cursor: not-allowed;
   opacity: 0.75;
   filter: grayscale(1);
+}
+button.hover1:disabled, 
+button.hover2:disabled {
+  background: #fff;
+  color: var(--primary);
 }
 .hide {
   opacity: 0;
