@@ -12,7 +12,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://timecard10-local.nol-is.de/*"],
+      "matches": ["<all_urls>"],
       "js": ["jquery.js", "content.js"]
     }
   ],

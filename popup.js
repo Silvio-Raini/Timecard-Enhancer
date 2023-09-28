@@ -1,56 +1,176 @@
-var nameIndexes = {
+// configurations
+const nameIndexes = {
   'A': 'Arbeitsbeginn',
   'AW': 'Anwesenheit',
   'AB': 'Arbeitszeit',
   'P': 'Pausenzeit',
   'RP': 'restl. Pausenzeit',
+  'GP': 'Pausenbeginn',
   'L': 'Feierabend',
   'S': 'Sollarbeitszeit',
   'G': 'Gleitzeit',
   'R': 'Verbleibend',
 }
-var operatorSelectbox = '<select title="Operatoren auswählen"><option value="+" selected>+</option><option value="-">-</option></select>';
+const operatorSelectbox = '<select title="Operatoren auswählen"><option value="+" selected>+</option><option value="-">-</option></select>';
+const blankEditor = '<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name*</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung*</label><div>'+makeSelectbox()+'<button name="add" class="hover1"><i class="fa-solid fa-plus"></i></button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position*</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div>';
+const editorAddAppend = '<div><button name="editSave" title="Änderungen speichern" class="hover1 hoverhop"><i class="fa-solid fa-floppy-disk"></i></button></div>';
+const editorEditAppend = '<div><button name="editSave" title="Änderungen speichern" class="hover1 hoverhop"><i class="fa-solid fa-floppy-disk"></i></button> <button name="delete" value="0" title="Entfernen" class="hover1 hoverhop"><i class="fa-solid fa-trash"></i></button></div>';
+const bootduration = 837; // ms
+
+const gettingstarted = '<div id="frame_setup"> <div class="step0 visible"><img src="setup.gif"><button type="button" id="getting_started" title="Einrichtung beginnen" class="hover2 hoverarrow">Einrichten</button></div><div class="step1"><div class="top"><h3>URL der Timecard</h3><div class="input"><label for="url">Timecard URL</label><input name="url" type="text" value="https://timecard10-local.nol-is.de/" placeholder="https://google.com"></div></div><div class="bottom"><button type="button" name="back" title="Vorheriger Schritt" class="hover2" disabled>Zurück</button><button type="button" name="next" title="Nächster Schritt" class="hover2">Weiter</button></div></div><div class="step2"><div class="top"><h3>Deine gewöhnlichen Zeiten</h3><div class="input"><label for="usualPauseStart" title="Beginn deiner üblichen Pause">gewöhnlicher Pausenbeginn:</label><input id="usualPauseStart" name="usualPauseStart" type="time" step="1" value="12:00:00"></div><div class="input"><label for="usualPauseTime" title="Zeitspanne deiner üblichen Pause">gewöhnliche Pausendauer:</label><input id="usualPauseTime" name="usualPauseTime" type="time" step="1" value="00:30:00"></div><span>Diese Daten dienen ausschließlich der Berechnung und werden nicht anderwaltig benutzt.</span></div><div class="bottom"><button type="button" name="back" title="Vorheriger Schritt" class="hover2">Zurück</button><button type="button" name="next" title="Nächster Schritt" class="hover2">Weiter</button></div></div><div class="step3"><div class="top"><h3>Start-Module auswählen</h3><div><div class="item" value="eyJpZCI6MiwicG9zaXRpb24iOiI0Iiwic3VidGl0bGUiOiJ2b3JyYXVzc2ljaHRsaWNoIiwic3ludGF4IjpbIkwiXSwidGl0bGUiOiJHZWhlbiJ9"><p>Feierabend</p><span>Vorraussichtlicher Feierabend</span></div><div class="item" value="eyJpZCI6MywicG9zaXRpb24iOiI1Iiwic3VidGl0bGUiOiJmcvxoZXN0ZW5zIiwic3ludGF4IjpbIkwiLCItIiwiRyJdLCJ0aXRsZSI6IkdlaGVuIn0="><p>früherer Feierabend</p><span>Feierabend abzüglich Gleitzeit</span></div><div class="item" value="eyJpZCI6NCwicG9zaXRpb24iOiIxMCIsInN1YnRpdGxlIjoiIiwic3ludGF4IjpbIlIiXSwidGl0bGUiOiJWZXJibGVpYmVuZCAoaCkifQ=="><p>Verbleibend</p><span>bis zum Feierabend</span></div><div class="item" value="skip"><p>Ohne fortfahren</p></div></div></div><div class="bottom"><button type="button" name="back" title="Vorheriger Schritt" class="hover2">Zurück</button><button type="button" name="next" title="Fortfahren" class="hover2 hide">Fortfahren</button></div></div> </div>';
 
 $(document).ready(async function() {
   resetEditor();
   await updatePanel();
+  // initialisation
+  $('#frame_start').addClass('visible');
+  setTimeout(async () => {
+    $('#frame_start').removeClass('visible');
+
+    var data = await readData();
+    if(isUndefined(data['url']) == true || isUndefined(data['usualPauseTime']) == true || isUndefined(data['usualPauseStart']) == true) {
+      $('body').append(gettingstarted);
+      $('#frame_setup').addClass('visible');
+    }else {
+      $('#frame_main').addClass('visible');
+    }
+    $('#frame_start').remove();
+    delete data;
+  }, bootduration);
+
   
-  $('#alert').on('animationend', function() { // alert animation 
-    $(this).removeClass('animate');
+  $(document).on('change', 'input[name="url"]', function() {
+    var val = $(this).val();
+    if(isURL(val)) {
+      $('div.step1 button[name="next"]').removeAttr('disabled');
+    }else {
+      $('div.step1 button[name="next"]').attr('disabled', '');
+    }
   });
 
+  $(document).on('click', '#frame_setup > div.step3 > div.top > div > div.item:not([value="skip"])', function() {
+    $(this).toggleClass('selected');
+
+    if($('#frame_setup > div.step3 > div.top > div > div.item.selected').length > 0) {
+      $('#frame_setup > div.step3 button[name="next"]').removeClass('hide');
+    }else {
+      $('#frame_setup > div.step3 button[name="next"]').addClass('hide');
+    }
+  });
+
+  $(document).on('click', '#frame_setup > div.step3 div.item[value="skip"]', function() {
+    $('#frame_setup').removeClass('visible');
+    $('#frame_setup > div.step3').removeClass('visible');
+    $('#frame_setup').remove();
+    $('#frame_main').addClass('visible');
+  });
+
+  $(document).on('click', '#getting_started', function() {
+    // toggle next step frame inside #frame_setup
+    // ...
+    $('#frame_setup > div.visible').each(function() {
+      $(this).removeClass('visible');
+    });
+    $('#frame_setup > div.step1').addClass('visible');
+  });
+
+  $(document).on('click', 'button[name="back"]', function() {
+    $('#frame_setup > div.visible').each(function() {
+      $(this).removeClass('visible');
+    });
+
+    var id = $(this).parent().parent().attr('class').slice(4);
+    id --;
+    if($('#frame_setup > div.step'+id).length > 0) {
+      $('#frame_setup > div.step'+id).addClass('visible');
+    }
+  });
+  $(document).on('click', 'button[name="next"]', async function() {
+    $('#frame_setup > div.visible').each(function() {
+      $(this).removeClass('visible');
+    });
+
+    var id = $(this).parent().parent().attr('class').slice(4);
+    id ++;
+    if($('#frame_setup > div.step'+id).length > 0) {
+      $('#frame_setup > div.step'+id).addClass('visible');
+    }else {
+      // when selection stuff
+      var imports = [];
+      $('#frame_setup > div.step3 > div.top > div > div.item.selected').each(function() {
+        imports.push($(this).attr('value'));
+      });
+
+      var result = [];
+      $(imports).each(async function() {
+        result.push(JSON.parse(atob(this)));
+      });
+      await include(btoa(JSON.stringify(result)));
+
+      $('#frame_setup').removeClass('visible');
+      $('#frame_setup > div.step3').removeClass('visible');
+      console.log('remove');
+      $('#frame_setup').remove();
+      $('#frame_main').addClass('visible');
+    }
+  });
+
+  $(document).on('click', 'div#frame_setup > div.step2 button[name="next"]', async function() {
+    await setupSave();
+  });
+
+  $(document).on('click', 'button[name="open_settings"]', function() {
+    $('#frame_main').removeClass('visible');
+    $('#frame_settings').addClass('visible');
+    $('#alert').detach().appendTo('#frame_settings');
+  });
+
+
+  // save
   $(document).on('click', 'button[name="editSave"], button[name="save"]', async function() { // save
     $('div#editor').removeClass('visible');
     await save();
   });
 
-  $(document).on('change', 'div.input > div > select', function() { // time input
+  $(document).on('click', '#frame_settings button[name="return"]', async function() {
+    await updatePanel();
+    $('div#frame_settings').removeClass('visible');
+    $('div#frame_main').addClass('visible');
+    $('#alert').detach().appendTo('#frame_main');
+  });
+
+  $(document).on('click', '#frame_settings button[name="reset"]', async function() {
+    await clearData();
+    window.close();
+  });
+
+  // editor fix
+  $(document).on('change', 'div.input > div > select', function() { // set time input
     if($(this).val() == 'time') {
       $(this).after('<input type="time" step="1"></input>');
       $(this).remove();
     }
   });
-
   $(document).on('click', 'button[name="add"]', function() { // add operator / variable
-    if($('div.input > div').children().length % 2 == 0) {
-       // even -> operator
+    if($('div.input > div').children().length % 2 == 0) { // even -> operator
       $(this).before(operatorSelectbox);
-    }else {
-      // uneven -> variable
+    }else { // uneven -> variable
       $(this).before(makeSelectbox);
     }
   });
 
+  // editor 
   $(document).on('click', 'button[name="append"], button[name="edit"]', async function() {
-
-    $('div#editor > div.wrapper').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name*</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung*</label><div>'+makeSelectbox()+'<button name="add" class="hover1"><i class="fa-solid fa-plus"></i></button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position*</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div>');
+    $('div#editor > div.wrapper').html(blankEditor);
     $('div#editor').addClass('visible');
 
 
     if($(this).attr('name') == 'edit') {
 
       var editID = $(this).val();
-      $('div#editor > div.wrapper').append('<div><button name="editSave" title="Änderungen speichern" class="hover1 hoverhop"><i class="fa-solid fa-floppy-disk"></i></button> <button name="delete" value="'+$(this).val()+'" title="Entfernen" class="hover1 hoverhop"><i class="fa-solid fa-trash"></i></button></div>');
+      $('div#editor > div.wrapper').append(editorEditAppend);
+      $('div#editor > div.wrapper button[name="delete"]').attr('value', $(this).val());
+
       $('button[name="editSave"]').attr('value', editID);
 
       var data = await readData('modules');
@@ -74,6 +194,8 @@ $(document).ready(async function() {
             }else if(this == 'P') {
               res += makeSelectbox(key2val(this) + 1);
             }else if(this == 'RP') {
+              res += makeSelectbox(key2val(this) + 1);
+            }else if(this == 'GP') {
               res += makeSelectbox(key2val(this) + 1);
             }else if(this == 'L') {
               res += makeSelectbox(key2val(this) + 1);
@@ -99,28 +221,19 @@ $(document).ready(async function() {
           console.log('no ID match');
         }
       });
+
+      delete data;
     }else {
-      $('div#editor > div.wrapper').append('<div><button name="editSave" title="Änderungen speichern" class="hover1 hoverhop"><i class="fa-solid fa-floppy-disk"></i></button></div>');
+      $('div#editor > div.wrapper').append(editorAddAppend);
     }
   });
 
+  // delete
   $(document).on('click', 'button[name="delete"]', function() {
     remove($(this).attr('value'));
   });
 
-  $('body, body div:not(#editor), div:not(#editor) *').click((event) => { // close editor
-    if($.contains($('div#editwrap')[0], event.target) || event.target.id == 'editwrap') {
-
-    }else {
-      if($('div#editor').css('visibility') == 'visible') {
-        $('div#editor').removeClass('visible'); 
-        resetEditor();
-        $('#import').removeClass('visible');
-        $('#export').removeClass('visible');
-      }
-    }
-  });
-
+  // import export modal
   $(document).on('click', 'button[name="import"]', function() {
     $('#import').addClass('visible');
   });
@@ -128,9 +241,10 @@ $(document).ready(async function() {
     $('#export').addClass('visible');
     var data = await readData();
     $('#export > p').html(btoa(JSON.stringify(data)));
+    delete data;
   });
 
-  $(document).on('click', 'button[name="share"]', async function() {
+  $(document).on('click', 'button[name="export_single"]', async function() {
     var id = $(this).val();
     console.log(id);
     var data = await readData('modules');
@@ -146,6 +260,9 @@ $(document).ready(async function() {
       $('#export > p').html(btoa(json));
     }
     $('#export').addClass('visible');
+
+    delete data;
+    delete id;
   });
 
   $(document).on('click', 'div#export, div#import', function(e) {
@@ -154,34 +271,48 @@ $(document).ready(async function() {
       $('#export').removeClass('visible');
     }
   });
+  $('body, body div:not(#editor), div:not(#editor) *').click((event) => { // close editor
+    if($.contains($('div#editwrap')[0], event.target) || event.target.id == 'editwrap') {
+
+    }else {
+      if($('div#editor').css('visibility') == 'visible') {
+        $('div#editor').removeClass('visible'); 
+        resetEditor();
+        $('#import').removeClass('visible');
+        $('#export').removeClass('visible');
+      }
+    }
+  });
+
+  // copy
   $(document).on('click', '#export > p', function() {
     var value = $('#export > p').html();
     navigator.clipboard.writeText(value);
+    delete value;
 
     $('#alert span').html('Daten kopiert');
     $('#alert').addClass('animate');
   });
-  $(document).on('click', 'button[name="importSend"]', function() {
+
+  // importing
+  $(document).on('click', 'button[name="importSend"]', async function() {
     var value = $('#import input[type="text"]').val();
-    include(value);
+    await include(value);
+    delete value;
   });
 
-  $(document).keydown(function(e) {
-    if(e.which == 13) {
-      save();
-    }else if(e.which == 118) {
-      share();
-    }else if(e.which == 119) {
-      include();
-    }
+  $('#alert').on('animationend', function() { // alert animation 
+    $(this).removeClass('animate');
   });
 });
+
 
 async function readData(key = null) {
   var result = await chrome.storage.local.get(key);
 
   if(chrome.runtime.lastError) {
     console.error(chrome.runtime.lastError);
+    return [];
   }
     
   return result;
@@ -199,25 +330,9 @@ async function writeData(data) {
     }
     $('#alert').addClass('animate');
      
-
     return;
   }
 }
-/* function clearData() 
-async function clearData() {
-  await chrome.storage.local.clear();
-
-  if(chrome.runtime.lastError) {
-    console.error(chrome.runtime.lastError);
-    $('#alert span').html('Leeren fehlgeschlagen');
-  }else {
-    $('#alert span').html('Leeren erfolgreich');
-  }
-  $('#alert').addClass('animate');
-   
-
-  return;
-}*/
 
 async function remove(deleteID) {
   if(deleteID !== undefined && typeof(deleteID == 'number')) {
@@ -245,14 +360,34 @@ async function remove(deleteID) {
   }
 }
 
+async function clearData() {
+  await chrome.storage.local.clear();
+
+  if(chrome.runtime.lastError) {
+    console.error(chrome.runtime.lastError);
+    $('#alert span').html('Leeren fehlgeschlagen');
+  }else {
+    $('#alert span').html('Leeren erfolgreich');
+  }
+  $('#alert').addClass('animate');
+
+  return;
+}
+
 async function save() {
   var data = await readData();
 
-  var usualPauseTime = '00:30:00';
-  var usualPauseStart = '12:00:00';
-  // var usualPauseTime = document.getElementById('usualPauseTime').value;
-  // var usualPauseStart = document.getElementById('usualPauseStart').value;
+  // var url = 'https://timecard10-local.nol-is.de/';
+  // var usualPauseTime = '00:30:00';
+  // var usualPauseStart = '12:00:00';
+
+  var url = $('#settings_url').val();
+  var usualPauseStart = $('#settings_usualPauseStart').val(); 
+  var usualPauseTime = $('#settings_usualPauseTime').val();
+
   var modules = ((data['modules']) ? data['modules'] : []);
+
+  delete data;
 
   var newModules = [];
   var editedModule = getEdit(); // gets addition or edit data
@@ -291,10 +426,12 @@ async function save() {
     }
   
     var newData = {
+      'url': url,
       'usualPauseStart': usualPauseStart,
       'usualPauseTime': usualPauseTime, 
       'modules': newModules
     };
+    console.log(newData);
     writeData(newData);    
   
     $('div#editor > div.wrapper').html('');
@@ -302,12 +439,30 @@ async function save() {
     resetEditor();
   }else {
     var newData = {
+      'url': url,
       'usualPauseStart': usualPauseStart,
       'usualPauseTime': usualPauseTime,
       'modules': modules 
     };
+    console.log(newData);
     writeData(newData); 
   }
+}
+
+async function setupSave() {
+  url = $('input[name="url"]').val();
+  usualPauseStart = $('input[name="usualPauseStart"]').val();
+  usualPauseTime = $('input[name="usualPauseTime"]').val();
+  var newData = {
+    'url': url,
+    'usualPauseStart': usualPauseStart,
+    'usualPauseTime': usualPauseTime,
+    'modules': [],
+  };
+  console.log(newData);
+  writeData(newData); 
+  updatePanel();
+  resetEditor();
 }
 
 async function updatePanel() {
@@ -315,13 +470,17 @@ async function updatePanel() {
 
   var data = await readData();
   if(typeof data == 'object') {
-    var usualPauseTime = ((data['usualPauseTime']) ? data['usualPauseTime'] : '00:30:00');
-    // document.getElementById('usualPauseTime').value = usualPauseTime;
+    var url = ((data['url']) ? data['url'] : 'https://timecard10-local.nol-is.de/');
+    $('#settings_url').attr('value', url);
 
-    var usualPauseStart = ((data['usualPauseStart']) ? data['usualPauseStart'] : '04:00:00');
-    // document.getElementById('usualPauseStart').value = usualPauseStart;
+    var usualPauseTime = ((data['usualPauseTime']) ? data['usualPauseTime'] : '00:30:00');
+    $('#settings_usualPauseTime').attr('value', usualPauseTime);
+
+    var usualPauseStart = ((data['usualPauseStart']) ? data['usualPauseStart'] : '12:00:00');
+    $('#settings_usualPauseStart').attr('value', usualPauseStart);
 
     var modules = ((data['modules']) ? data['modules'] : {});
+    delete data;
 
     if($(modules).length > 0) {
       $.each(modules, function(key, value) {
@@ -338,7 +497,7 @@ async function updatePanel() {
             res += ' ';
           });
   
-          $('div.list').append('<div class="order'+position+'"><span class="title" title="'+title+'">'+title+'</span><span class="subtitle" title="'+subtitle+'">'+subtitle+'</span><span class="syntax" title="'+res+'">'+res+'</span><button name="edit" value="'+id+'" title="Modul bearbeiten" class="hover1"><i class="fa-solid fa-pen"></i></button><button name="share" value="'+id+'" title="Modul exportieren" class="hover1"><i class="fa-solid fa-arrow-down-to-line"></i></button></div>');
+          $('div.list').append('<div class="order'+position+'"><span class="title" title="'+title+'">'+title+'</span><span class="subtitle" title="'+subtitle+'">'+subtitle+'</span><span class="syntax" title="'+res+'">'+res+'</span><button name="edit" value="'+id+'" title="Modul bearbeiten" class="hover1"><i class="fa-solid fa-pen"></i></button><button name="export_single" value="'+id+'" title="Modul exportieren" class="hover1"><i class="fa-solid fa-arrow-down-to-line"></i></button></div>');
         });
       });
     }
@@ -443,12 +602,12 @@ function makeSelectbox(selected = 0) {
 }
 
 function resetEditor() {
-  $('div#editor > div.wrapper').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name*</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung*</label><div>'+makeSelectbox()+'<button name="add" class="hover1"><i class="fa-solid fa-plus"></i></button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position*</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div><div><button name="editSave" title="Änderungen speichern" class="hover1 hoverhop"><i class="fa-solid fa-floppy-disk"></i></button></div>');
+  $('div#editor > div.wrapper').html(blankEditor);
   $('input[name="editName"]').val('');
   $('input[name="editBeschreibung"]').val('');
   $('input[name="editPosition"]').val('');
   $('div#editor div.input > div').html('');
-  $('div#editor > div.wrapper').html('<div class="input"><label for="editName" title="Bezeichnung des Moduls">Name*</label><input id="editName" name="editName" type="text"></div><div class="input"><label for="editBeschreibung" title="Beschreibung des Moduls">Beschreibung</label><input id="editBeschreibung" name="editBeschreibung" type="text"></div><div class="input" style="height: auto; padding-bottom: 1rem; min-height: auto;"><label title="Rechenweg des Moduls">Berechnung*</label><div>'+makeSelectbox()+'<button name="add" class="hover1"><i class="fa-solid fa-plus"></i></button></div></div><div class="input"><label for="editPosition" title="Position des Moduls">Position*</label><input id="editPosition" name="editPosition" type="number" step="1" min="1" value="1"></div><div><button name="editSave" title="Änderungen speichern" class="hover1 hoverhop"><i class="fa-solid fa-floppy-disk"></i></button></div>');
+  $('div#editor > div.wrapper').html(blankEditor);
 }
 
 /**
@@ -457,6 +616,7 @@ function resetEditor() {
 async function share() {
   var data = await readData();
   console.log(btoa(JSON.stringify(data)));
+  delete data;
 }
 
 /**
@@ -464,33 +624,42 @@ async function share() {
  * @param {string} input = btoa(JSON.stringify(obj))
  */
 async function include(input) {
+  console.log('Import Start');
   var json = atob(input);
   if(isJson(json)) {
     var including_data = JSON.parse(json);
     var success = true;
     var highestID = 1;
 
+    var url = await readData('url');
     var usualPauseStart = await readData('usualPauseStart');
     var usualPauseTime = await readData('usualPauseTime');
     var modules = ((including_data['modules']) ? including_data['modules'] : including_data);
-    console.log(including_data);
-    console.log(modules);
+    console.log('read:', usualPauseStart, usualPauseTime);
+    console.log('appending:', modules);
+    // console.log(including_data);
+    // console.log(modules);
 
     if($(modules.length > 0)) {
-      var data = await readData('modules');
+      var data = await readData('modules');      
       data['modules'] = ((data['modules']) ? data['modules'] : []);
+
+      console.log('read:', data['modules']);
 
       $(data).each(function() {
         $.each(this, function() {
           $(this).each(function() {
+            console.log(this);
             if(highestID < this['id']) {
               highestID = this['id'];
+              console.log('new high is: '+highestID);
             }
           });
         });
       });
       
       $(modules).each(function() {
+        console.log('each appending Module:',this);
         highestID++;
 
         var appendingModule = {
@@ -512,12 +681,14 @@ async function include(input) {
 
 
       var obj = {
+        'url': ((url['url']) ? url['url'] : 'https://timecard10-local.nol-is.de/'),
         'usualPauseTime': ((usualPauseTime['usualPauseTime']) ? usualPauseTime['usualPauseTime'] : '00:30:00'),
         'usualPauseStart': ((usualPauseStart['usualPauseStart']) ? usualPauseStart['usualPauseStart'] : '12:00:00'),
         'modules': data['modules']
       };
+      console.log('obj', obj);
 
-      console.log(obj);
+      // console.log(obj);
       writeData(obj);
       updatePanel();
     }
@@ -533,6 +704,12 @@ async function include(input) {
     $('#alert').addClass('animate');
   }
 
+  delete obj;
+  delete json;
+  delete data;
+
+  console.log('import end');
+  return;
   // var data = await readData();
   // console.log(JSON.stringify(data));
 }
@@ -544,4 +721,14 @@ function isJson(str) {
     return false;
   }
   return true;
+}
+function isURL(str) {
+  const urlRegex = /^(http|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/;
+  return urlRegex.test(str);
+}
+function isUndefined(value) {
+  if(value === undefined || value === 'undefined') {
+    return true;
+  }
+  return false;
 }

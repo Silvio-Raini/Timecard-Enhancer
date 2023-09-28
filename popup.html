@@ -2,391 +2,103 @@
   <head>
     <title>Timecard Enhancer</title>
     <meta charset="utf8">
+    <link rel="stylesheet" href="popup.css">
     <link rel="stylesheet" href="https://fonts.nol-is.de/css/0b73ccdf-24bd-4125-95ad-7aab93635f5a.css">
-  </head>
-  <style type="text/css">
-    body {
-      margin: 0;
-      background: #fff;
-      min-width: 29rem;
-      --primary: #FFC107;
-      --secondary: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 3.5rem 1rem 2rem;
-      row-gap: 1rem;
-      font-family: Verdana;
-      height: 25rem;
-    }
-    h1 {
-      font-size: 1rem;
-      padding: 0.5rem 1rem;
-      background-color: var(--primary);
-      color: var(--secondary);
-      font-weight: 500;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      margin: 0;
-    }
-    h3 {
-      margin: 0;
-    }
-    button {
-      font-size: 1rem;
-      padding: 0.5rem 1rem;
-      border-radius: 0.25rem;
-      font-weight: 500;
-      transition: 0.4s;
-    }
-
-    .hover1 {
-      background-color: var(--primary);
-      color: var(--secondary);
-      border: 2px solid var(--primary);
-      cursor: pointer;
-      transform: 0.4s;
-    }
-    .hover1:hover, 
-    .hover1:focus,
-    .hover1:focus-visible {
-      background-color:var(--secondary);
-      color: var(--primary);
-      border-color: var(--primary);
-      outline: none;
-    }
-    .hover2 {
-      background: var(--secondary);
-      border: 2px solid var(--primary);
-      color: var(--primary);
-      cursor: pointer;
-      transform: 0.4s;
-    }
-    .hover2:hover,
-    .hover2:focus,
-    .hover2:focus-visible {
-      background-color: var(--primary);
-      color: var(--secondary);
-      border: 2px solid var(--primary);
-      outline: none;
-    }
-    .hoverhop:hover,
-    .hoverhop:focus,
-    .hoverhop:focus-visible {
-      transform: translateY(-5px);
-      outline: none;
-    }
-
-    .input {
-      position: relative;
-      width: 100%;
-      height: 3rem;
-      min-height: 3rem;
-      border: 1px solid;
-    }
-
-    .input > label {
-      position: absolute;
-      top: 0.25rem;
-      left: 0.5rem;
-      z-index: 1;
-    }
-
-    .input > input {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3rem;
-      padding: 1rem 0.5rem 0;
-      font-size: 1rem;
-      outline: none;
-      border: none;
-    }
-    .list {
-      display: flex;
-      flex-direction: column;
-      row-gap: 0.5rem;
-      display: flex;
-      width: 100%;
-    }
-
-    .list > div {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .list > div > span.title {
-      font-size: 0.75rem;
-      font-weight: 500;
-      text-align: left;
-    }
-
-    .list > div > span.subtitle {
-      font-weight: 400;
-      text-align: left;
-    }
-
-    .list > div > span {
-      width: 4.5rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .list > div > button {
-      float: right;
-      font-size: 0.8rem;
-      padding: 0.45rem 0.5rem;
-      transition: 0.4s;
-    }
-
-    .list > div > span.syntax {
-      width: 14rem;
-    }
-
-    body > div {
-      width: 100%;
-      display: flex;
-      column-gap: 1rem;
-    }
-    
-    div#alert {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 2rem;
-      background-color: var(--primary);
-      color: var(--secondary);
-      font-weight: 500;
-      font-size: 1rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding-bottom: 0.25rem;
-      transform: translateY(100%);
-      z-index: 1000;
-    }
-
-    div#alert.animate {
-      animation: alert 2.75s;
-    }
-
-    @keyframes alert {
-      0% { transform: translateY(100%) }
-      50% { transform: translateY(0) }
-      65% { transform: translateY(0) }
-      100% { transform: translateY(100%) }
-    }
-
-    div#editor > div.wrapper {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 70%;
-      height: auto;
-      aspect-ratio: 9/12;
-      background: #fff;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 20%);
-      border-radius: 0.5rem;
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      padding: 2rem;
-      row-gap: 1rem;
-      max-height: 100%;
-      box-sizing: border-box;
-      overflow: scroll;
-      overflow-x: hidden;
-    }
-
-    div.input > div {
-      /* position: absolute; */
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3rem;
-      padding: 2rem 0.5rem 0;
-      font-size: 1rem;
-      outline: none;
-      display: flex;
-      flex-wrap: wrap;
-      row-gap: 0.5rem;
-      column-gap: 0.5rem;
-      height: auto;
-      justify-content: space-around;
-    }
-
-    div.input > div > select, 
-    div.input > div > input {
-      height: 2rem;
-      width: 7rem;
-      outline: none;
-      border: 1px solid;
-    }
-
-    button[name="add"] {
-      border-width: 1px;
-      font-weight: 500;
-      aspect-ratio: 1/1;
-      width: auto;
-      height: 2rem;
-      display: flex;
-      font-size: 1rem;
-      justify-content: center;
-      align-items: center;
-      padding: 0;
-    }
-
-    div.input > div > input[type="time"] {
-      padding-right: 1.45rem;
-      position: relative;
-      font-size: 0.75rem;
-    }
-
-    div.input > div > select:after, 
-    div.input > div > input[type="time"]:after {
-      position: absolute;
-      right: 0.5rem;
-      top: 50%;
-      transform: translateY(-50%);
-      content: '↓';
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    div.list > div.step {
-      display: flex;
-      justify-content: center;
-    }  
-    span.version {
-      float: right;
-      font-size: 0.8rem;
-      font-weight: bolder;
-      opacity: 0.8;
-      font-style: italic;
-    }
-    div.buttons {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    div#export, div#import, div#editor {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #0003;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      visibility: hidden;
-      z-index: 999;
-      opacity: 0;
-    }
-
-    div#export > p, div#import > div.wrapper {
-      max-width: 80%;
-      overflow-wrap: anywhere;
-      padding: 1rem;
-      background: #fff;
-      border-radius: 0.5rem;
-      color: #000;
-      transition: 0.4s;
-    }
-
-    div#export > p:hover,
-    div#export > p:focus,
-    div#export > p:focus-visible {
-      color: var(--primary);
-      outline: none;
-    }
-
-    div#export.visible, 
-    div#import.visible,
-    div#editor.visible {
-      visibility: visible;
-      opacity: 1;
-    }
-    div#import > div.wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      row-gap: 1rem;
-      width: 100%;
-    }
-    div#import input {
-      font-size: 1rem;
-      padding: 0.25rem;
-      border: 1px #0000007a solid;
-      width: 100%;
-    }
-    .list > div > button:last-of-type:not([name="append"]) {
-      font-size: 1rem;
-    }
-
-    .list > div > button:not([name="append"]) {
-      height: 2rem;
-      aspect-ratio: 6/5;
-      font-size: 0.75rem;
-    }
-    div#editor div.wrapper > div:not(.input) {
-      display: flex;
-      justify-content: center;
-      column-gap: 1rem;
-    }
-    span.version > a {
-      color: inherit;
-      text-decoration: none;
-    }
-    </style>
-  <body>
-    <h1>Timecard Enhancer <span class="version"><a href="https://sandbox-noah-local.nolis-manager.de/Timecard_Enhancer/#version" target="_blank">v1.6</a></span></h1>
-    
-    <div class="buttons">
-      <button type="button" id="save" name="save" title="Speichern" class="hover2 hoverhop"><i class="fa-solid fa-floppy-disk"></i></button>
-      <button type="button" id="save" name="import" title="Importieren" class="hover2 hoverhop"><i class="fa-solid fa-arrow-up-to-line"></i></button>
-      <button type="button" id="save" name="export" title="alle Module exportieren" class="hover2 hoverhop"><i class="fa-solid fa-arrow-down-to-line"></i></button>
-    </div>
-
-    <h3>Konfiguration</h3>
-
-    <!-- no use at the moment -->
-    <!-- 
-    <div>
-      <div class="input">
-        <label for="usualPauseStart" title="Absoluter (ab 08:00:00 aufwärts) oder Relativer Zeitwert">Pausenbeginn ab:</label>
-        <input id="usualPauseStart" name="usualPauseStart" type="time" step="1">
-      </div>
-
-      <div class="input">
-        <label for="usualPauseTime" title="Zeitspanne deiner Pause">Typische Pausenzeit:</label>
-        <input id="usualPauseTime" name="usualPauseTime" type="time" step="1">
-      </div>
-    </div>
-    -->
-    
-    <div class="list">
-      <div class="step"><button name="append" title="Modul erstellen"><i class="fa-solid fa-plus"></i> Modul erstellen</button></div>
-    </div>
-
-    <div id="editor">
-      <div id="editwrap" class="wrapper"></div>
-    </div>
-    <div id="alert">
-      <span></span>
-    </div>
-    <div id="import"><div class="wrapper"><input type="text" placeholder="Importschlüssel hier einfügen" min="8"><button type="submit" name="importSend" class="hover2">Importieren</button></div></div>
-    <div id="export"><p>Da ist etwas Schiefgelaufen :/</p></div>
-
     <script src="jquery.js"></script>
     <script src="popup.js"></script>
+  </head>
+  <body>
+    <!--
+Boot:
+  Timecard Logo time animation: 10:45:00 -> 10:52:30 -> 11:00:00 ~ 0.5s -> 0.75s [.gif]
+
+Gettings Started:
+  Einrichten
+  [tab auswählen bzw. URL einstellen] 
+  [Pausendauer und gewöhnliche Pausenbeginn einstellen] 
+  [Auswahl von Beispielen + Option Blank fortzufahren]
+
+Settings:
+  URL bearbeiten,
+  Pausendauer bearbeiten, 
+  Pausenbeginn bearbeiten, 
+  Hilfe -> n.pieles@nolis.de / s.heim@nolis.de
+
+  todo:
+    - fix include() to work continuesly 
+
+ backup: eyJtb2R1bGVzIjpbeyJpZCI6MiwicG9zaXRpb24iOiI0Iiwic3VidGl0bGUiOiJ2b3JyYXVzc2ljaHRsaWNoIiwic3ludGF4IjpbIkwiXSwidGl0bGUiOiJHZWhlbiJ9LHsiaWQiOjMsInBvc2l0aW9uIjoiNSIsInN1YnRpdGxlIjoiZnL8aGVzdGVucyIsInN5bnRheCI6WyJMIiwiLSIsIkciXSwidGl0bGUiOiJHZWhlbiJ9LHsiaWQiOjQsInBvc2l0aW9uIjoiMTAiLCJzdWJ0aXRsZSI6IiIsInN5bnRheCI6WyJSIl0sInRpdGxlIjoiVmVyYmxlaWJlbmQgKGgpIn0seyJpZCI6NSwicG9zaXRpb24iOiI5Iiwic3VidGl0bGUiOiJzcOR0ZXN0ZW5zIiwic3ludGF4IjpbIkEiLCIrIiwiMDY6MDA6MDAiXSwidGl0bGUiOiJQYXVzZSJ9LHsiaWQiOjYsInBvc2l0aW9uIjoiMTEiLCJzdWJ0aXRsZSI6IiIsInN5bnRheCI6WyJSIiwiLSIsIjAyOjAwOjAwIiwiLSIsIlAiXSwidGl0bGUiOiJWZXJibGVpYmVuZCB6dXIgUGF1c2UgKGgpIn1dLCJ1c3VhbFBhdXNlU3RhcnQiOiIxMjowMDowMCIsInVzdWFsUGF1c2VUaW1lIjoiMDA6MzA6MDAifQ==
+-->
+    
+    <div id="frame_start"> <!-- boot animation --> <!-- destroy after finished -->
+      <img src="boot.gif">
+    </div>
+
+    <div id="frame_main"> <!-- main frame -->
+      <h1>Timecard Enhancer <span class="version"><a href="https://sandbox-noah-local.nolis-manager.de/Timecard_Enhancer/#version" target="_blank">v1.7</a></span> </h1>
+    
+      <div class="buttons">
+        <button type="button" name="save" title="Speichern" class="hover2 hoverhop"> <i class="fa-solid fa-floppy-disk"></i> </button>
+        <button type="button" name="import" title="Importieren" class="hover2 hoverhop"> <i class="fa-solid fa-arrow-up-to-line"></i> </button>
+        <button type="button" name="export" title="alle Module exportieren" class="hover2 hoverhop"> <i class="fa-solid fa-arrow-down-to-line"></i> </button>
+        <button type="button" name="open_settings" title="Einstellungen öffnen" class="hover2 hoverhop"> <i class="fa-solid fa-gear"></i> </button>
+      </div>
+
+
+      <h3>Module</h3>
+
+      <div class="list">
+      </div>
+
+      <div id="editor">
+        <div id="editwrap" class="wrapper">
+          
+        </div>
+      </div>
+
+      <div id="alert">
+        <span></span>
+      </div>
+
+      <div id="import">
+        <div class="wrapper">
+          <input type="text" placeholder="Importschlüssel hier einfügen" min="8">
+          <button type="submit" name="importSend" class="hover2">Importieren</button>
+        </div>
+      </div>
+
+      <div id="export">
+        <p>Da ist etwas Schiefgelaufen :/</p>
+      </div>
+    </div>
+
+    <div id="frame_settings"> <!-- settings configurations, usual pause time, tab url, etc. -->
+      <h1>Einstellungen <span class="version"><a href="https://sandbox-noah-local.nolis-manager.de/Timecard_Enhancer/#version" target="_blank">v1.7</a></span> </h1>
+
+      <div class="wrapper">
+        <button name="reset" title="auf Werkseinstellungen zurücksetzen"><i class="fa-solid fa-power-off"></i></button>
+        
+        <div class="input">
+          <label for="settings_url">Timecard URL</label>
+          <input id="settings_url" name="settings_url" type="text" placeholder="https://google.com">
+        </div>
+
+        <div class="input">
+          <label for="settings_usualPauseStart" title="Beginn deiner üblichen Pause">gewöhnlicher Pausenbeginn:</label>
+          <input id="settings_usualPauseStart" name="settings_usualPauseTime" type="time" step="1" value="12:00:00">
+        </div>
+  
+        <div class="input">
+          <label for="settings_usualPauseTime" title="Zeitspanne deiner üblichen Pause">gewöhnliche Pausendauer:</label>
+          <input id="settings_usualPauseTime" name="settings_usualPauseTime" type="time" step="1" value="00:30:00">
+        </div>
+
+        <span>Diese Daten dienen ausschließlich der Berechnung und werden nicht anderwaltig benutzt.</span>
+
+        <button name="save" class="hover1">Speichern</button>
+        <button name="return" class="hover2">Zurück</button>
+      </div>
+    </div>
+
   </body>
 </html>

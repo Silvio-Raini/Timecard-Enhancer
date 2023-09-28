@@ -1,12 +1,12 @@
-// var config = {
-//   'usualPauseStart': '12:00:00',
-//   'usualPauseTime': '00:30:00',
-// }
+var config = {
+  'usualPauseStart': '12:00:00',
+  'usualPauseTime': '00:30:00',
+}
 
 async function updateFrame() {
   var data = await readData();
-  // config.usualPauseStart = ((data['usualPauseStart']) ? data['usualPauseStart'] : config.usualPauseStart);
-  // config.usualPauseTime = ((data['usualPauseTime']) ? data['usualPauseTime'] : config.usualPauseTime);
+  config.usualPauseStart = ((data['usualPauseStart']) ? data['usualPauseStart'] : config.usualPauseStart);
+  config.usualPauseTime = ((data['usualPauseTime']) ? data['usualPauseTime'] : config.usualPauseTime);
 
   var variables = await getVariables();
 
@@ -37,10 +37,10 @@ async function updateFrame() {
           }else if(this == 'AB') {
             variable = variables[this];
           }else if(this == 'RP') {
-            console.log(variables, variables[this]);
+            variable = variables[this];
+          }else if(this == 'GP') {
             variable = variables[this];
           }else if(this == 'P') {
-            console.log(variables, variables[this]);
             variable = variables[this];
           }else if(this == 'L') {
             variable = variables[this];
@@ -89,13 +89,13 @@ async function getVariables() {
   var restpauseTime = null;
   var pausenzeitTimes = splitTime(pausenzeitTime);
   if(pausenzeitTimes['hours'] == 0 && pausenzeitTimes['minutes'] == 0 && pausenzeitTimes['seconds'] == 0) {
-    // pausenzeitTimes = unsplitTime(splitTime(config.usualPauseTime)); // split + unsplit = fix time (valid)
-    pausenzeitTimes = '00:30:00';
+    pausenzeitTimes = unsplitTime(splitTime(config.usualPauseTime)); // split + unsplit = fix time (valid)
     restpauseTime = pausenzeitTimes;
   }else {
     pausenzeitTimes = unsplitTime(pausenzeitTimes);
     restpauseTime = '00:00:00'; // geht besser
   }
+  var gewoenlichPauseBegineTime = unsplitTime(splitTime(config.usualPauseStart));
   
 
   var gehenTime = calcNewTime(calcNewTime(kommenTime, '08:00:00', 'add'), pausenzeitTimes, 'add');
@@ -108,6 +108,7 @@ async function getVariables() {
     'AB': arbeitszeitTime, // arbeitszeit
     'P': pausenzeitTimes, // pause gewöhnlich
     'RP': restpauseTime, // restpause
+    'GP': gewoenlichPauseBegineTime, // gewöhnlicher Pausenbeginn
     'G': gleitzeitTime, // gleitzeit
     'S': sollarbeitszeitTime, // gleitzeit
     'L': gehenTime, // gehen
@@ -122,12 +123,12 @@ async function readData(key = null) {
 
   if(chrome.runtime.lastError) {
     console.error(chrome.runtime.lastError);
-    $('#alert span').html('Lesen fehlgeschlagen');
+    $('div.alert span').html('Lesen fehlgeschlagen');
     result = null;
   }else {
-    $('#alert span').html('Lesen erfolgreich');
+    $('div.alert span').html('Lesen erfolgreich');
   }
-  // $('#alert').addClass('animate');
+  // $('div.alert').addClass('animate');
     
   return result;
 }
@@ -282,17 +283,20 @@ function initMutationObserver() {
 }
 
 // Funktion zum Überprüfen und Initialisieren, sobald die Seite und die Tabelle geladen sind
-function checkAndInit() {
-  const workingProfile = document.querySelector("#workingprofile");
-  if (workingProfile) {
-    if (workingProfile.innerHTML != "") {
-      initMutationObserver();
-      updateFrame();
-    } else {
-      setTimeout(checkAndInit, 500); // Überprüfe alle 500 ms erneut
+async function checkAndInit() {
+  var url = await readData('url');
+  if($(url).length !== 0 && window.location.href.includes(url['url'])) {
+
+    const workingProfile = document.querySelector("#workingprofile");
+    if (workingProfile) {
+      if (workingProfile.innerHTML != "") {
+        initMutationObserver();
+        updateFrame();
+      } else {
+        setTimeout(checkAndInit, 500); // Überprüfe alle 500 ms erneut
+      }
     }
   }
-
 }
 
 // Run the checkAndInit function when the page loads
