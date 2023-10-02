@@ -90,6 +90,9 @@ button {
   top: 0.25rem;
   left: 0.5rem;
   z-index: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  right: 0.5rem;
 }
 
 .input > input {
@@ -238,7 +241,7 @@ div.input > div {
 div.input > div > select, 
 div.input > div > input {
   height: 2rem;
-  width: 7rem;
+  width: 6.5rem;
   outline: none;
   border: 1px solid;
 }
@@ -268,8 +271,9 @@ div.input > div > input[type="time"]:after {
   right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  content: '↓';
-  font-size: 1rem;
+  content: '\f063';
+  font-family: 'fontawesome';
+  font-size: 0.75rem;
   cursor: pointer;
 }
 div.list > div.step {
@@ -589,6 +593,7 @@ div#frame_settings button[name="reset"] {
   align-items: center;
   font-size: 1.25rem;
   box-sizing: border-box;
+  cursor: pointer;
 }
 
 div#frame_settings button[name="reset"]:hover, 
@@ -598,4 +603,13 @@ div#frame_settings button[name="reset"]:focus-visible {
   background-color: var(--primary);
   font-size: 1.5rem;
   border-color: var(--primary);
+}
+
+div#frame_settings > div > div > div.input {
+  width: 50%;
+  display: inline-block;
+}
+div#frame_settings > div > div:not(.input) {
+  display: flex;
+  column-gap: 0.75rem;
 }

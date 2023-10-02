@@ -84,7 +84,9 @@ async function getVariables() {
   var arbeitszeitTime = $('#workingtime').attr('title');
   var sollarbeitszeitTime = $('#targettime').attr('title');
   var gleitzeitTime = $('#details-0 > table > tbody > tr:nth-child(4) > td.col-2.rsct-alignright').attr('title');
-
+  if(typeof gleitzeitTime == 'undefined') {
+    gleitzeitTime = $('#details-0 > table > tbody > tr:nth-child(2) > td.col-2.rsct-alignright').attr('title');
+  }
   // calculating
   var restpauseTime = null;
   var pausenzeitTimes = splitTime(pausenzeitTime);
@@ -101,7 +103,6 @@ async function getVariables() {
   var gehenTime = calcNewTime(calcNewTime(kommenTime, '08:00:00', 'add'), pausenzeitTimes, 'add');
   var verbleibendTime = calcRemainingTime(gehenTime);
 
-
   var variables = {
     'A': kommenTime, // kommen
     'AW': anwesenheitTime, // anwesenheit
@@ -114,7 +115,6 @@ async function getVariables() {
     'L': gehenTime, // gehen
     'R': verbleibendTime, // verbleibend
   };
-
   return variables;
 }
 
