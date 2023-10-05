@@ -1,23 +1,20 @@
-# Die Timecard Enhancer Chrome-Erweiterung
+# The Timecard Enhancer Chrome Extension
 
-Die Zeit ist Geld, und in der heutigen Arbeitswelt ist es entscheidend, die verfügbare Zeit optimal zu nutzen.
-Doch was passiert, wenn du zusätzliche Zeiten berechnen musst, sei es, um herauszufinden, wann du nach einem
-verschlafenen Morgen gehen kannst, oder um deine Pausen genauer zu planen?
-Hier kommt die Lösung: Der Timecard Enhancer, eine Chrome-Erweiterung, die dir dabei hilft, diese zusätzlichen Uhrzeiten mühelos zu berechnen.
+Time is money, and in today's working world, it's crucial to make optimal use of the available time. But what happens when you need to calculate additional times, whether to figure out when you can leave after a sleepy morning or to plan your breaks more precisely? Enter the solution: The Timecard Enhancer, a Chrome extension that helps you effortlessly calculate these additional times.
 
-# Was ist der Timecard Enhancer?
-Der Timecard Enhancer ist eine Chrome-Erweiterung, die entwickelt wurde, um deinen Arbeitsalltag zu erleichtern. Mit dieser Erweiterung kannst du ganz einfach zusätzliche Zeilen in deiner Timecard-Oberfläche berechnen.
+# What is the Timecard Enhancer?
+The Timecard Enhancer is a Chrome extension designed to simplify your workday. With this extension, you can easily calculate additional entries in your timecard interface.
 
-# Module
-Durch individuelle Module, liegt es an dir deine Wunsch-Uhrzeiten zu berechnen
+# Modules
+Through individual modules, it's up to you to calculate your desired times.
 
-Hier sind die Aktuellen Variablen auf die du zugreifen darfst:
-- Arbeitsbeginn: Uhrzeit des Arbeitsbeginn
-- Arbeitszeit: Zeit der Arbeitszeit
-- Pausenzeit: Zeit der Pausenzeit
-- restl. Pausenzeit: Zeit der restlichen Pausenzeit
-- Anwesenheit: Zeit der Anwesenheit (Arbeitszeit + Pausenzeit)
-- Sollarbeitzeit: Zeit der Sollarbeitszeit
-- Gleitzeit: Zeit deiner Gleitzeit
-- Feierabend: Uhrzeit deines vorraussichtlichen Feierabends (bei optimalen Bedingungen)
-- Verbleibend: Zeit bis zum vorraussichtlichen Feierabends (unter optimalen Bedingungen)
+Here are the current variables you can access:
+- Start time: Time of the start of work
+- Working hours: Duration of working hours
+- Break time: Duration of break time
+- Remaining break time: Duration of the remaining break time
+- Attendance time: Duration of attendance (working hours + break time)
+- Standard working hours: Duration of standard working hours
+- Flextime: Duration of your flextime
+- End of work: Anticipated end time of your workday (under optimal conditions)
+- Remaining time: Time until the anticipated end of your workday (under optimal conditions)
