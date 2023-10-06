@@ -292,6 +292,10 @@ async function checkAndInit() {
       if (workingProfile.innerHTML != "") {
         initMutationObserver();
         updateFrame();
+        if($('#timecard_enhancer_addition_1').length == 0) {
+          $('body').append('<span id="timecard_enhancer_addition_1" style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); font-size: 1.5rem; opacity: 0.5;">Drücke [R] um zu aktualisieren</span>');
+        }
+        
       } else {
         setTimeout(checkAndInit, 500); // Überprüfe alle 500 ms erneut
       }
@@ -301,3 +305,12 @@ async function checkAndInit() {
 
 // Run the checkAndInit function when the page loads
 window.addEventListener("load", checkAndInit);
+        
+setInterval(function() {  dispatchEvent(new Event('load')); }, 60000);
+
+$(document).on('keypress', function(e) {
+  if(e.which == 114) {
+    console.log('refresh');
+    dispatchEvent(new Event('load'));
+  }
+});
