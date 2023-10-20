@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Timecard Enhancer™",
-  "version": "1.7.1",
+  "version": "1.8",
   "author": "Noah Pieles, Silvio Heim",
   "description": "Berechnet den vorraussichtlichen Feierabend, die spätmöglichste Pause oder was auch immer du dir berechnen lassen möchtest! - Jetzt auch mit Import und Export!",
   "permissions": ["activeTab", "scripting", "storage"],

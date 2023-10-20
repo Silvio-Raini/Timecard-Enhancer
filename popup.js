@@ -17,7 +17,7 @@ const editorAddAppend = '<div><button name="editSave" title="Änderungen speiche
 const editorEditAppend = '<div><button name="editSave" title="Änderungen speichern" class="hover1 hoverhop"><i class="fa-solid fa-floppy-disk"></i></button> <button name="delete" value="0" title="Entfernen" class="hover1 hoverhop"><i class="fa-solid fa-trash"></i></button></div>';
 const bootduration = 837; // ms
 
-const gettingstarted = '<div id="frame_setup"> <div class="step0 visible"><img src="setup.gif"><button type="button" id="getting_started" title="Einrichtung beginnen" class="hover2 hoverarrow">Einrichten</button></div><div class="step1"><div class="top"><h3>URL der Timecard</h3><div class="input"><label for="url">Timecard URL</label><input name="url" type="text" value="https://timecard10-local.nol-is.de/" placeholder="https://google.com"></div></div><div class="bottom"><button type="button" name="back" title="Vorheriger Schritt" class="hover2" disabled>Zurück</button><button type="button" name="next" title="Nächster Schritt" class="hover2">Weiter</button></div></div><div class="step2"><div class="top"><h3>Deine gewöhnlichen Zeiten</h3><div class="input"><label for="usualPauseStart" title="Beginn deiner üblichen Pause">gewöhnlicher Pausenbeginn:</label><input id="usualPauseStart" name="usualPauseStart" type="time" step="1" value="12:00:00"></div><div class="input"><label for="usualPauseTime" title="Zeitspanne deiner üblichen Pause">gewöhnliche Pausendauer:</label><input id="usualPauseTime" name="usualPauseTime" type="time" step="1" value="00:30:00"></div><span>Diese Daten dienen ausschließlich der Berechnung und werden nicht anderwaltig benutzt.</span></div><div class="bottom"><button type="button" name="back" title="Vorheriger Schritt" class="hover2">Zurück</button><button type="button" name="next" title="Nächster Schritt" class="hover2">Weiter</button></div></div><div class="step3"><div class="top"><h3>Start-Module auswählen</h3><div><div class="item" value="eyJpZCI6MiwicG9zaXRpb24iOiI0Iiwic3VidGl0bGUiOiJ2b3JyYXVzc2ljaHRsaWNoIiwic3ludGF4IjpbIkwiXSwidGl0bGUiOiJHZWhlbiJ9"><p>Feierabend</p><span>Vorraussichtlicher Feierabend</span></div><div class="item" value="eyJpZCI6MywicG9zaXRpb24iOiI1Iiwic3VidGl0bGUiOiJmcvxoZXN0ZW5zIiwic3ludGF4IjpbIkwiLCItIiwiRyJdLCJ0aXRsZSI6IkdlaGVuIn0="><p>früherer Feierabend</p><span>Feierabend abzüglich Gleitzeit</span></div><div class="item" value="eyJpZCI6NCwicG9zaXRpb24iOiIxMCIsInN1YnRpdGxlIjoiIiwic3ludGF4IjpbIlIiXSwidGl0bGUiOiJWZXJibGVpYmVuZCAoaCkifQ=="><p>Verbleibend</p><span>bis zum Feierabend</span></div><div class="item" value="skip"><p>Ohne fortfahren</p></div></div></div><div class="bottom"><button type="button" name="back" title="Vorheriger Schritt" class="hover2">Zurück</button><button type="button" name="next" title="Fortfahren" class="hover2 hide">Fortfahren</button></div></div> </div>';
+const gettingstarted = '<div id="frame_setup"> <div class="step0 visible"><img src="setup.gif"><button type="button" id="getting_started" title="Einrichtung beginnen" class="hover2 hoverarrow">Einrichten</button></div><div class="step1"><div class="top"><h3>URL der Timecard</h3><div class="input"><label for="url">Timecard URL</label><input name="url" type="text" value="https://timecard10-local.nol-is.de/Timerecording" placeholder="https://google.com"></div></div><div class="bottom"><button type="button" name="back" title="Vorheriger Schritt" class="hover2" disabled>Zurück</button><button type="button" name="next" title="Nächster Schritt" class="hover2">Weiter</button></div></div><div class="step2"><div class="top"><h3>Deine gewöhnlichen Zeiten</h3><div class="input"><label for="usualPauseStart" title="Beginn deiner üblichen Pause">gewöhnlicher Pausenbeginn:</label><input id="usualPauseStart" name="usualPauseStart" type="time" step="1" value="12:00:00"></div><div class="input"><label for="usualPauseTime" title="Zeitspanne deiner üblichen Pause">gewöhnliche Pausendauer:</label><input id="usualPauseTime" name="usualPauseTime" type="time" step="1" value="00:30:00"></div><span>Diese Daten dienen ausschließlich der Berechnung und werden nicht anderwaltig benutzt.</span></div><div class="bottom"><button type="button" name="back" title="Vorheriger Schritt" class="hover2">Zurück</button><button type="button" name="next" title="Nächster Schritt" class="hover2">Weiter</button></div></div><div class="step3"><div class="top"><h3>Start-Module auswählen</h3><div><div class="item" value="eyJpZCI6MiwicG9zaXRpb24iOiI0Iiwic3VidGl0bGUiOiJ2b3JyYXVzc2ljaHRsaWNoIiwic3ludGF4IjpbIkwiXSwidGl0bGUiOiJHZWhlbiJ9"><p>Feierabend</p><span>Vorraussichtlicher Feierabend</span></div><div class="item" value="eyJpZCI6MywicG9zaXRpb24iOiI1Iiwic3VidGl0bGUiOiJmcvxoZXN0ZW5zIiwic3ludGF4IjpbIkwiLCItIiwiRyJdLCJ0aXRsZSI6IkdlaGVuIn0="><p>früherer Feierabend</p><span>Feierabend abzüglich Gleitzeit</span></div><div class="item" value="eyJpZCI6NCwicG9zaXRpb24iOiIxMCIsInN1YnRpdGxlIjoiIiwic3ludGF4IjpbIlIiXSwidGl0bGUiOiJWZXJibGVpYmVuZCAoaCkifQ=="><p>Verbleibend</p><span>bis zum Feierabend</span></div><div class="item" value="skip"><p>Ohne fortfahren</p></div></div></div><div class="bottom"><button type="button" name="back" title="Vorheriger Schritt" class="hover2">Zurück</button><button type="button" name="next" title="Fortfahren" class="hover2 hide">Fortfahren</button></div></div> </div>';
 
 $(document).ready(async function() {
   var url = await readData('url');
@@ -150,7 +150,7 @@ $(document).ready(async function() {
 
   $(document).on('click', '#frame_settings button[name="return"]', async function() {
     var data = await readData();
-    var url = ((data['url']) ? data['url'] : 'https://timecard10-local.nol-is.de/');
+    var url = ((data['url']) ? data['url'] : 'https://timecard10-local.nol-is.de/Timerecording');
     $('#settings_url').val(url);
 
     var usualPauseTime = ((data['usualPauseTime']) ? data['usualPauseTime'] : '00:30:00');
@@ -651,11 +651,11 @@ async function updatePanel() {
           });
 
           
-            var result = '00:00:00';
-            // var result = 'NAN';
-            console.log(variables, Object.keys(variables).length);
+          // var result = '00:00:00';
+          var result = 'NAN';
+          console.log(variables, Object.keys(variables).length);
           if(Object.keys(variables).length > 0) {
-            var result = '00:00:00';
+            result = '00:00:00';
             var operator = 'add';
             var variable = '00:00:00';
             var iteration = 0;
