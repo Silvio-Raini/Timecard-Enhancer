@@ -487,7 +487,8 @@ async function setupSave() {
     'usualPauseTime': usualPauseTime,
     'modules': [],
   };
-  console.log(newData);
+
+  jQuery(document).find('#frame_main > h1 > a').attr('href', url);
   writeData(newData); 
   updatePanel();
   resetEditor();
