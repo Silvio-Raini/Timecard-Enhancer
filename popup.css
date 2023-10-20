@@ -165,6 +165,10 @@ button {
   width: 14rem;
 }
 
+.list > div > span.time {
+  width: 4rem;
+}
+
 body > div#frame_main > div {
   width: 100%;
   display: flex;

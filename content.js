@@ -13,8 +13,8 @@ async function updateFrame() {
   var modules = ((data['modules']) ? data['modules'] : []);
   
   if($(modules).length > 0) {
-    $.each(modules, function(key, value) {
-      $(value).each(function() {
+    await $.each(modules, async function(key, value) {
+      $(value).each(async function() {
         var id = key;
         var title = this['title'];
         var subtitle = this['subtitle'];
@@ -26,7 +26,7 @@ async function updateFrame() {
         var variable = '00:00:00';
         var iteration = 0;
         
-        $(syntax).each(function() {
+        await $(syntax).each(async function() {
           iteration++;
           // console.group(`Iteration(${iteration}) { this: ${this}, result: ${result} }`);
             
@@ -70,10 +70,16 @@ async function updateFrame() {
           // console.groupEnd();
         });
         // console.log(`modul+${id}, ${title}, ${subtitle}, ${result}, ${position}`);
-        makeRow('modul'+id, title, subtitle, result, position);
+        await makeRow('modul'+id, title, subtitle, result, position);
       });
     });
   }
+
+  
+  var data = await readData();
+  data.variables = await getVariables();
+  data.variables.date = new Date().toDateString();
+  await writeData(data);
 }
 
 async function getVariables() {
@@ -132,9 +138,23 @@ async function readData(key = null) {
     
   return result;
 }
+async function writeData(data) {
+  if(typeof data !== undefined) {
+    await chrome.storage.local.set(data);
 
-function makeRow(id, title, subtitle, value, position, reached = false) {
+    if(chrome.runtime.lastError) {
+      console.error(chrome.runtime.lastError);
+      $('#alert span').html('Speichern fehlgeschlagen');
+    }else {
+      $('#alert span').html('Gespeichert');
+    }
+    $('#alert').addClass('animate');
+     
+    return;
+  }
+}
 
+async function makeRow(id, title, subtitle, value, position, reached = false) {  
   var selector = '#'+id;
   if($(selector).length) { // if exists
     $(selector+' > td.col-2').html(((value.charAt(0) == '0') ? value.substring(1, value.length - 3) : value.substring(0, value.length - 3)));
@@ -145,6 +165,8 @@ function makeRow(id, title, subtitle, value, position, reached = false) {
     newRow.className = 'd-flex';
     var rowPrefix = '<td class="col-1"></td><td class="col-8" title="Ergänzt durch die Chrome-Extension Timecard Enhancer™"'+((reached) ? ' style="color: #1acd1a;"' : '')+'>';
     newRow.innerHTML = rowPrefix+title+'<span style="font-size: 1rem;opacity: 0.75;position: absolute;top: 50%;right: -4.5rem;transform: translateY(-50%);">'+subtitle+'</span></td><td class="col-2 rsct-alignright" title="'+value+'">'+((value.charAt(0) == '0') ? value.substring(1, value.length - 3) : value.substring(0, value.length - 3)) + '</td>';
+
+    
   
     $('#balances-daily tbody tr:nth-child('+position+')').after(newRow);
   }

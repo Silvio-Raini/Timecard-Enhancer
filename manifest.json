@@ -8,7 +8,7 @@
   "action": {
     "default_icon": "icon128.png",
     "default_popup": "popup.html",
-    "default_title": "Configuration Modal"
+    "default_title": "Timecard Enhancer"
   },
   "content_scripts": [
     {

@@ -437,6 +437,7 @@ async function save() {
             this['subtitle'] = editedModule['subtitle'];
             this['position'] = editedModule['position'];
             this['syntax'] = editedModule['syntax'];
+            this['result'] = 'NAN';
           } 
           newModules.push(this);
         });
@@ -494,6 +495,121 @@ async function setupSave() {
   resetEditor();
 }
 
+/**
+ * 
+ * @param {string} from (hh:mm:ss)
+ * @param {string} value (hh:mm:ss)
+ * @param {string} calcmethod (add / substract)
+ * @returns {string} result (hh:mm:ss)
+ */
+function calcNewTime(from, value, calcmethod = 'add') {
+  if(from.includes(':') && from.length >= 5 && value.includes(':') && value.length >= 5) {
+    fromParts = from.split(':');
+    fromHours = parseInt(fromParts[0] || 0);
+    fromMinutes = parseInt(fromParts[1] || 0);
+    fromSeconds = parseInt(fromParts[2] || 0); // if not exists
+
+    valueParts = value.split(':');
+    valueHours = parseInt(valueParts[0] || 0);
+    valueMinutes = parseInt(valueParts[1] || 0);
+    valueSeconds = parseInt(valueParts[2] || 0); // if not exists
+
+    switch(calcmethod) {
+      default:
+      case 'add':
+        var resultHours = fromHours + valueHours;
+        var resultMinutes = fromMinutes + valueMinutes;
+        var resultSeconds = fromSeconds + valueSeconds;
+        break;
+      case 'subtract':
+        var resultHours = fromHours - valueHours;
+        var resultMinutes = fromMinutes - valueMinutes;
+        var resultSeconds = fromSeconds - valueSeconds;
+        break;
+    }
+
+    // fix time
+    if (resultSeconds >= 60) {
+      resultMinutes += Math.floor(resultSeconds / 60);
+      resultSeconds %= 60;
+    }
+    if (resultMinutes >= 60) {
+      resultHours += Math.floor(resultMinutes / 60);
+      resultMinutes %= 60;
+    }
+
+    if(resultSeconds < 0) {
+      resultMinutes --;
+      resultSeconds += 60;
+    }
+    if(resultMinutes < 0) {
+      resultHours --;
+      resultMinutes += 60;
+    }
+
+    var result = resultHours.toString().padStart(2, '0') + ':' + resultMinutes.toString().padStart(2, '0') + ':' + resultSeconds.toString().padStart(2, '0');
+    return result; 
+  }else {
+    return '00:00:00';
+  }
+}
+
+function splitTime(time) {
+  var result = [];
+
+  if(time.includes(':')) {
+    var timeParts = time.split(':');
+    result['hours'] = parseInt(timeParts[0]);
+    result['minutes'] = parseInt(timeParts[1]);
+    result['seconds'] = parseInt(timeParts[2] || 0);
+  }else {
+    console.log('not containing ":"');
+    result['hours'] = 0;
+    result['minutes'] = 0;
+    result['seconds'] = 0;
+  }
+
+  return result
+} 
+
+function unsplitTime(splittedTime) {
+  splittedTime['hours'] = ((splittedTime['hours']) ? splittedTime['hours'] : (splittedTime[0]) ? splittedTime[0] : 0);
+  splittedTime['minutes'] = ((splittedTime['minutes']) ? splittedTime['minutes'] : (splittedTime[1]) ? splittedTime[1] : 0);
+  splittedTime['seconds'] = ((splittedTime['seconds']) ? splittedTime['seconds'] : (splittedTime[2]) ? splittedTime[2] : 0);
+
+  var string = ''+ splittedTime['hours'].toString().padStart(2,'0')+':'+splittedTime['minutes'].toString().padStart(2,'0')+':'+splittedTime['seconds'].toString().padStart(2,'0');
+  return string;
+}
+
+function calcRemainingTime(leaveTime) {
+  var now = new Date();
+  var currentHours = now.getHours();
+  var currentMinutes = now.getMinutes();
+  var currentSeconds = now.getSeconds();
+
+  const leaveTimeParts = splitTime(leaveTime);
+
+  const timeDifference = ((leaveTimeParts['hours'] - currentHours) * 3600 + (leaveTimeParts['minutes'] - currentMinutes) * 60 + (leaveTimeParts['seconds'] - currentSeconds));
+
+  const hours = Math.floor(timeDifference / 3600);
+  const minutes = Math.floor((timeDifference % 3600) / 60);
+  const seconds = timeDifference % 60;
+  var newTime = {
+    'hours': hours,
+    'minutes': minutes,
+    'seconds': seconds,
+  };
+
+  var remainingTime = unsplitTime(newTime);
+  
+  if(timeDifference < 0) { // wenn überstunden
+    var addition = Math.abs(timeDifference);
+    var remainingTime = new Date(addition * 1000).toISOString().substring(11, 19);
+    var remainingTime = '+'+remainingTime;
+  }
+  return remainingTime;
+}
+
 async function updatePanel() {
   $('div.list').html(''); 
 
@@ -509,6 +625,14 @@ async function updatePanel() {
     $('#settings_usualPauseStart').attr('value', usualPauseStart);
 
     var modules = ((data['modules']) ? data['modules'] : {});
+    var variables = ((data.variables ? data.variables : {}));
+
+    var today = new Date();
+    if(variables.date != today.toDateString()) {
+      console.log(today.toDateString());
+      variables = {};
+    }
+    console.log(variables);
     delete data;
 
     if($(modules).length > 0) {
@@ -525,8 +649,72 @@ async function updatePanel() {
             res += makeReadable(this);
             res += ' ';
           });
+
+          
+            var result = '00:00:00';
+            // var result = 'NAN';
+            console.log(variables, Object.keys(variables).length);
+          if(Object.keys(variables).length > 0) {
+            var result = '00:00:00';
+            var operator = 'add';
+            var variable = '00:00:00';
+            var iteration = 0;
+
+            var now = [];
+            now['hours'] = today.getHours();
+            now['minutes'] = today.getMinutes();
+            now['seconds'] = today.getSeconds();
+            now = unsplitTime(now);
+            
+            variables['AW'] = calcNewTime(now, variables['A'], 'subtract'); // Time now - A (Arbeitsbeginn) 
+            variables['AB'] = calcNewTime(calcNewTime(now, variables['A'], 'subtract'), variables['P'], 'subtract'); // Time now - A - pausenzeit
+            variables['L'] = calcNewTime(calcNewTime(variables['A'], variables['S'], 'add'), variables['P'], 'add');
+            variables['R'] = calcRemainingTime(variables['L']);
+            
+            $(syntax).each(function() {
+              iteration++;
+                
+              if(this == 'A') {
+                variable = variables[this];
+              }else if(this == 'AW') {
+                variable = variables[this];
+              }else if(this == 'AB') {
+                variable = variables[this];
+              }else if(this == 'RP') {
+                variable = variables[this];
+              }else if(this == 'GP') {
+                variable = variables[this];
+              }else if(this == 'P') {
+                variable = variables[this];
+              }else if(this == 'L') {
+                variable = variables[this];
+              }else if(this == 'S') {
+                variable = variables[this];
+              }else if(this == 'G') {
+                variable = variables[this];
+              }else if(this == 'R') {
+                variable = variables[this];
+              }else if(this == '+') {
+                operator = 'add';
+                variable = '';
+              }else if(this == '-') {
+                operator = 'subtract';
+                variable = '';
+              }else if(this.includes(':')) {
+                variable = this;
+              }else {
+                variable = '00:00:00';
+              }
+
+
+              if(operator.length > 0 && variable.length > 0) {
+                result = calcNewTime(result, variable, operator);
+                operator = '';
+              }
+            });
+          }
   
-          $('div.list').append('<div class="order'+position+'"><span class="title" title="'+title+'">'+title+'</span><span class="subtitle" title="'+subtitle+'">'+subtitle+'</span><span class="syntax" title="'+res+'">'+res+'</span><button name="edit" value="'+id+'" title="Modul bearbeiten" class="hover1"><i class="fa-solid fa-pen"></i></button><button name="export_single" value="'+id+'" title="Modul exportieren" class="hover1"><i class="fa-solid fa-arrow-down-to-line"></i></button></div>');
+          $('div.list').append('<div class="order'+position+'"><span class="title" title="'+title+'">'+title+'</span><span class="subtitle" title="'+subtitle+'">'+subtitle+'</span><span class="syntax" title="'+res+'">'+res+'</span><span class="time" title="'+result+'">'+(result != 'NAN' ? ((result.charAt(0) == '0') ? result.substring(1, result.length - 3) : result.substring(0, result.length - 3)) : result)+'</span><button name="edit" value="'+id+'" title="Modul bearbeiten" class="hover1"><i class="fa-solid fa-pen"></i></button><button name="export_single" value="'+id+'" title="Modul exportieren" class="hover1"><i class="fa-solid fa-arrow-down-to-line"></i></button></div>');
         });
       });
     }
@@ -557,6 +745,7 @@ function getEdit(readable = false) {
     'title': $('input[name="editName"]').val(),
     'subtitle': $('input[name="editBeschreibung"]').val(),
     'syntax':'',
+    'result':'NAN',
     'position':$('input[name="editPosition"]').val(),
   };
 
@@ -696,6 +885,7 @@ async function include(input) {
           'title': ((this['title'] && this['title'].length > 0) ? this['title'] : undefined),
           'subtitle': ((this['subtitle'] && this['subtitle'].length > 0) ? this['subtitle'] : ''),
           'syntax': ((this['syntax'] && $(this['syntax']).length > 0) ? this['syntax'] : undefined),
+          'result': 'NAN',
           'position': ((this['position'] && this['position'].length > 0) ? this['position'] : undefined)
         };
 
