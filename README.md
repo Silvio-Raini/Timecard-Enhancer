@@ -5,6 +5,16 @@ Time is money, and in today's working world, it's crucial to make optimal use of
 # What is the Timecard Enhancer?
 The Timecard Enhancer is a Chrome extension designed to simplify your workday. With this extension, you can easily calculate additional entries in your timecard interface.
 
+# Installation
+Note that this extension is developed specifically for the REINER SCT timeCard Version 23.04.02
+1. Open your chrome browser and go to "chrome://extensions"
+2. Enable the developer mode
+3. Download this repository and put it into a folder
+4. Then click on "load unpacked" and select the folder
+5. (optional) click on the extensions icon in your topbar
+6. (optional) pin down the "Timecard Enhancer"
+7. Click on the Timecard Enhancer Icon and configure it 
+
 # Modules
 Through individual modules, it's up to you to calculate your desired times.
 
